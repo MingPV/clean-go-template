@@ -1,0 +1,49 @@
+package adapters
+
+import (
+	"github.com/MingPV/clean-go-template/entities"
+	"github.com/MingPV/clean-go-template/usecases"
+	"gorm.io/gorm"
+)
+
+type GormOrderRepository struct {
+	db *gorm.DB
+}
+
+func NewGormOrderRepository(db *gorm.DB) usecases.OrderRepository {
+	return &GormOrderRepository{db: db}
+}
+
+func (r *GormOrderRepository) Save(order *entities.Order) error {
+	return r.db.Create(&order).Error
+}
+
+func (r *GormOrderRepository) FindAll() ([]entities.Order, error) {
+	var orders []entities.Order
+	if err := r.db.Find(&orders).Error; err != nil {
+		return nil, err
+	}
+	return orders, nil
+}
+
+func (r *GormOrderRepository) FindByID(id int) (entities.Order, error) {
+	var order entities.Order
+	if err := r.db.First(&order, id).Error; err != nil {
+		return entities.Order{}, err
+	}
+	return order, nil
+}
+
+func (r *GormOrderRepository) Patch(id int, order entities.Order) error {
+	if err := r.db.Model(&entities.Order{}).Where("id = ?", id).Updates(order).Error; err != nil {
+		return err
+	}
+	return nil
+}
+
+func (r *GormOrderRepository) Delete(id int) error {
+	if err := r.db.Delete(&entities.Order{}, id).Error; err != nil {
+		return err
+	}
+	return nil
+}

@@ -1,0 +1,32 @@
+# Go build artifacts
+/bin/
+/build/
+/dist/
+*.exe
+*.test
+*.out
+
+# Dependency directories
+/vendor/
+
+# Go modules cache
+go.sum
+
+# IDE/editor settings
+.vscode/
+.idea/
+*.swp
+
+# Logs
+*.log
+
+# Env files
+.env
+.env.*
+
+# Postgres volume (optional if mounted locally)
+postgres_data/
+
+# OS-specific files
+.DS_Store
+Thumbs.db
