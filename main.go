@@ -6,9 +6,8 @@ import (
 	"fmt"
 	"os"
 
-	adapters "github.com/MingPV/clean-go-template/adapters/order"
 	"github.com/MingPV/clean-go-template/entities"
-	"github.com/MingPV/clean-go-template/usecases"
+	"github.com/MingPV/clean-go-template/pkg/routes"
 	"github.com/gofiber/fiber/v3"
 	"github.com/joho/godotenv"
 	"gorm.io/driver/postgres"
@@ -39,15 +38,12 @@ func main() {
 		log.Fatalf("failed to migrate database: %v", err)
 	}
 
-	orderRepo := adapters.NewGormOrderRepository(db)
-	orderService := usecases.NewOrderService(orderRepo)
-	orderHandler := adapters.NewHttpOrderHandler(orderService)
+	// Register routes
+	routes.RegisterPublicRoutes(app, db)
 
-	app.Get("/orders", orderHandler.FindAllOrders)
-	app.Get("/orders/:id", orderHandler.FindOrderByID)
-	app.Post("/orders", orderHandler.CreateOrder)
-	app.Delete("/orders/:id", orderHandler.DeleteOrder)
-	app.Patch("/orders/:id", orderHandler.PatchOrder)
+	// Not found route
+	routes.RegisterNotFoundRoute(app)
 
 	log.Fatal(app.Listen(":8000"))
+
 }
