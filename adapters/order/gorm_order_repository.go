@@ -2,7 +2,7 @@ package adapters
 
 import (
 	"github.com/MingPV/clean-go-template/entities"
-	"github.com/MingPV/clean-go-template/usecases"
+	usecases "github.com/MingPV/clean-go-template/usecases/order"
 	"gorm.io/gorm"
 )
 

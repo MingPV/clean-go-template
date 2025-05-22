@@ -4,7 +4,7 @@ import (
 	"strconv"
 
 	"github.com/MingPV/clean-go-template/entities"
-	"github.com/MingPV/clean-go-template/usecases"
+	usecases "github.com/MingPV/clean-go-template/usecases/order"
 	"github.com/gofiber/fiber/v3"
 )
 

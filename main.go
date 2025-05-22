@@ -25,12 +25,13 @@ func main() {
 	}
 
 	// Auto migrate entities
-	if err := db.AutoMigrate(&entities.Order{}); err != nil {
+	if err := db.AutoMigrate(&entities.Order{}, &entities.User{}); err != nil {
 		log.Fatalf("❌ failed to migrate database: %v", err)
 	}
 
 	// Register routes
 	routes.RegisterPublicRoutes(app, db)
+	routes.RegisterPrivateRoutes(app, db)
 	routes.RegisterNotFoundRoute(app)
 
 	// Start server
