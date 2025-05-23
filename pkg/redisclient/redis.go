@@ -29,6 +29,15 @@ func InitRedisClient(addr string) error {
 	return nil
 }
 
+// CloseRedisClient safely closes the Redis connection
+func CloseRedisClient() error {
+	if client == nil {
+		return nil
+	}
+	fmt.Println("🔒 Closing Redis connection...")
+	return client.Close()
+}
+
 // GetClient returns the Redis client
 func GetClient() *redis.Client {
 	if client == nil {

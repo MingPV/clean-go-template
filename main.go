@@ -5,12 +5,12 @@ import (
 
 	"github.com/MingPV/clean-go-template/entities"
 	"github.com/MingPV/clean-go-template/pkg/config"
+	"github.com/MingPV/clean-go-template/pkg/database"
 	"github.com/MingPV/clean-go-template/pkg/middleware"
 	"github.com/MingPV/clean-go-template/pkg/redisclient"
 	"github.com/MingPV/clean-go-template/pkg/routes"
+	"github.com/MingPV/clean-go-template/utils"
 	"github.com/gofiber/fiber/v3"
-	"gorm.io/driver/postgres"
-	"gorm.io/gorm"
 )
 
 func main() {
@@ -21,7 +21,8 @@ func main() {
 	app := fiber.New()
 
 	// Connect to PostgreSQL with config
-	db, err := gorm.Open(postgres.Open(cfg.DatabaseDSN), &gorm.Config{})
+	// db, err := gorm.Open(postgres.Open(cfg.DatabaseDSN), &gorm.Config{})
+	db, err := database.Connect(cfg.DatabaseDSN)
 	if err != nil {
 		log.Fatalf("failed to connect database: %v", err)
 	}
@@ -31,7 +32,6 @@ func main() {
 		log.Fatalf("failed to migrate database: %v", err)
 	}
 
-	// redisclient.InitRedisClient(cfg.RedisAddress)
 	// Initialize Redis (optional, allow failure in dev mode)
 	if err := redisclient.InitRedisClient(cfg.RedisAddress); err != nil {
 		log.Printf("redis not available: %v", err)
@@ -45,6 +45,6 @@ func main() {
 	routes.RegisterNotFoundRoute(app)
 
 	// Start server
-	log.Printf("🚀 Server is running on port %s", cfg.AppPort)
-	log.Fatal(app.Listen(":" + cfg.AppPort))
+	utils.StartServerWithGracefulShutdown(app, ":"+cfg.AppPort)
+
 }
