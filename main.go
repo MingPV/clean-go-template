@@ -5,6 +5,7 @@ import (
 
 	"github.com/MingPV/clean-go-template/entities"
 	"github.com/MingPV/clean-go-template/pkg/config"
+	"github.com/MingPV/clean-go-template/pkg/middleware"
 	"github.com/MingPV/clean-go-template/pkg/redisclient"
 	"github.com/MingPV/clean-go-template/pkg/routes"
 	"github.com/gofiber/fiber/v3"
@@ -35,6 +36,8 @@ func main() {
 	if err := redisclient.InitRedisClient(cfg.RedisAddress); err != nil {
 		log.Printf("redis not available: %v", err)
 	}
+
+	middleware.FiberMiddleware(app)
 
 	// Register routes
 	routes.RegisterPublicRoutes(app, db)
