@@ -34,7 +34,7 @@ func (r *GormOrderRepository) FindByID(id int) (entities.Order, error) {
 	return order, nil
 }
 
-func (r *GormOrderRepository) Patch(id int, order entities.Order) error {
+func (r *GormOrderRepository) Patch(id int, order *entities.Order) error {
 	if err := r.db.Model(&entities.Order{}).Where("id = ?", id).Updates(order).Error; err != nil {
 		return err
 	}

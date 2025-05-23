@@ -71,7 +71,7 @@ func (h *HttpOrderHandler) PatchOrder(c fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "invalid id"})
 	}
 
-	var order entities.Order
+	order := &entities.Order{}
 	if err := c.Bind().Body(&order); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "invalid request"})
 	}

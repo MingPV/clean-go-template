@@ -5,6 +5,7 @@ import (
 
 	"github.com/MingPV/clean-go-template/entities"
 	"github.com/MingPV/clean-go-template/pkg/config"
+	"github.com/MingPV/clean-go-template/pkg/redisclient"
 	"github.com/MingPV/clean-go-template/pkg/routes"
 	"github.com/gofiber/fiber/v3"
 	"gorm.io/driver/postgres"
@@ -21,12 +22,18 @@ func main() {
 	// Connect to PostgreSQL with config
 	db, err := gorm.Open(postgres.Open(cfg.DatabaseDSN), &gorm.Config{})
 	if err != nil {
-		log.Fatalf("❌ failed to connect database: %v", err)
+		log.Fatalf("failed to connect database: %v", err)
 	}
 
 	// Auto migrate entities
 	if err := db.AutoMigrate(&entities.Order{}, &entities.User{}); err != nil {
-		log.Fatalf("❌ failed to migrate database: %v", err)
+		log.Fatalf("failed to migrate database: %v", err)
+	}
+
+	// redisclient.InitRedisClient(cfg.RedisAddress)
+	// Initialize Redis (optional, allow failure in dev mode)
+	if err := redisclient.InitRedisClient(cfg.RedisAddress); err != nil {
+		log.Printf("redis not available: %v", err)
 	}
 
 	// Register routes
