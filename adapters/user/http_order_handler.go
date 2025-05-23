@@ -17,7 +17,16 @@ func NewHttpUserHandler(useCase usecases.UserUseCase) *HttpUserHandler {
 	return &HttpUserHandler{userUseCase: useCase}
 }
 
-// Register new user
+// Register godoc
+// @Summary Register a new user
+// @Tags users
+// @Accept json
+// @Produce json
+// @Param user body entities.User true "User registration payload"
+// @Success 201 {object} entities.User
+// @Failure 400 {object} map[string]string "Invalid request payload or user already exists"
+// @Failure 500 {object} map[string]string "Internal server error"
+// @Router /auth/signup [post]
 func (h *HttpUserHandler) Register(c *fiber.Ctx) error {
 	user := &entities.User{}
 	if err := c.BodyParser(&user); err != nil {
@@ -34,7 +43,17 @@ func (h *HttpUserHandler) Register(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusCreated).JSON(user)
 }
 
-// Authenticate user (login)
+// Login godoc
+// @Summary Authenticate user and return token
+// @Tags users
+// @Accept json
+// @Produce json
+// @Param credentials body map[string]string true "Login credentials (email & password)"
+// @Success 200 {object} map[string]interface{} "Authenticated user and JWT token"
+// @Failure 400 {object} map[string]string "Invalid request payload"
+// @Failure 401 {object} map[string]string "Invalid email or password"
+// @Failure 500 {object} map[string]string "Internal server error"
+// @Router /auth/signin [post]
 func (h *HttpUserHandler) Login(c *fiber.Ctx) error {
 	loginReq := struct {
 		Email    string `json:"email"`
@@ -58,7 +77,16 @@ func (h *HttpUserHandler) Login(c *fiber.Ctx) error {
 	})
 }
 
-// Get my user
+// GetUser godoc
+// @Summary Get currently authenticated user
+// @Tags users
+// @Produce json
+// @Success 200 {object} entities.User
+// @Failure 401 {object} map[string]string "Unauthorized - missing or invalid token"
+// @Failure 400 {object} map[string]string "Invalid user ID from token"
+// @Failure 404 {object} map[string]string "User not found"
+// @Failure 500 {object} map[string]string "Internal server error"
+// @Router /users/me [get]
 func (h *HttpUserHandler) GetUser(c *fiber.Ctx) error {
 	userID := c.Locals("user_id")
 	if userID == nil {
@@ -79,7 +107,16 @@ func (h *HttpUserHandler) GetUser(c *fiber.Ctx) error {
 	return c.JSON(user)
 }
 
-// Get user by ID
+// FindUserByID godoc
+// @Summary Get user by ID
+// @Tags users
+// @Produce json
+// @Param id path int true "User ID"
+// @Success 200 {object} entities.User
+// @Failure 400 {object} map[string]string "Invalid or missing user ID"
+// @Failure 404 {object} map[string]string "User not found"
+// @Failure 500 {object} map[string]string "Internal server error"
+// @Router /users/{id} [get]
 func (h *HttpUserHandler) FindUserByID(c *fiber.Ctx) error {
 	id := c.Params("id")
 	if id == "" {
@@ -101,7 +138,13 @@ func (h *HttpUserHandler) FindUserByID(c *fiber.Ctx) error {
 	return c.JSON(user)
 }
 
-// Get all users
+// FindAllUsers godoc
+// @Summary Get all users
+// @Tags users
+// @Produce json
+// @Success 200 {array} entities.User
+// @Failure 500 {object} map[string]string "Internal server error"
+// @Router /users [get]
 func (h *HttpUserHandler) FindAllUsers(c *fiber.Ctx) error {
 	users, err := h.userUseCase.FindAllUsers()
 	if err != nil {

@@ -13,6 +13,11 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
+// @title CleanGO API
+// @version 1.0
+// @description This is the backend API for CleanGO project.
+// @host localhost:8000
+// @BasePath /api/v1
 func main() {
 	// Load config from .env or environment
 	cfg := config.LoadConfig()
@@ -37,6 +42,8 @@ func main() {
 	}
 
 	middleware.FiberMiddleware(app)
+
+	routes.SwaggerRoute(app)
 
 	// Register routes
 	routes.RegisterPublicRoutes(app, db)
