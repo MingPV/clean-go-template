@@ -9,7 +9,7 @@ import (
 
 	"github.com/MingPV/clean-go-template/pkg/database"
 	"github.com/MingPV/clean-go-template/pkg/redisclient"
-	"github.com/gofiber/fiber/v3"
+	"github.com/gofiber/fiber/v2"
 )
 
 // StartServerWithGracefulShutdown starts the server with graceful shutdown support.

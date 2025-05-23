@@ -10,7 +10,7 @@ import (
 	"github.com/MingPV/clean-go-template/pkg/redisclient"
 	"github.com/MingPV/clean-go-template/pkg/routes"
 	"github.com/MingPV/clean-go-template/utils"
-	"github.com/gofiber/fiber/v3"
+	"github.com/gofiber/fiber/v2"
 )
 
 func main() {
@@ -21,7 +21,6 @@ func main() {
 	app := fiber.New()
 
 	// Connect to PostgreSQL with config
-	// db, err := gorm.Open(postgres.Open(cfg.DatabaseDSN), &gorm.Config{})
 	db, err := database.Connect(cfg.DatabaseDSN)
 	if err != nil {
 		log.Fatalf("failed to connect database: %v", err)

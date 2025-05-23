@@ -6,7 +6,7 @@ import (
 
 	"github.com/MingPV/clean-go-template/entities"
 	usecases "github.com/MingPV/clean-go-template/usecases/user"
-	"github.com/gofiber/fiber/v3"
+	"github.com/gofiber/fiber/v2"
 )
 
 type HttpUserHandler struct {
@@ -18,9 +18,9 @@ func NewHttpUserHandler(useCase usecases.UserUseCase) *HttpUserHandler {
 }
 
 // Register new user
-func (h *HttpUserHandler) Register(c fiber.Ctx) error {
+func (h *HttpUserHandler) Register(c *fiber.Ctx) error {
 	user := &entities.User{}
-	if err := c.Bind().Body(&user); err != nil {
+	if err := c.BodyParser(&user); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "invalid request"})
 	}
 
@@ -35,13 +35,13 @@ func (h *HttpUserHandler) Register(c fiber.Ctx) error {
 }
 
 // Authenticate user (login)
-func (h *HttpUserHandler) Login(c fiber.Ctx) error {
+func (h *HttpUserHandler) Login(c *fiber.Ctx) error {
 	loginReq := struct {
 		Email    string `json:"email"`
 		Password string `json:"password"`
 	}{}
 
-	if err := c.Bind().Body(&loginReq); err != nil {
+	if err := c.BodyParser(&loginReq); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "invalid request"})
 	}
 
@@ -59,7 +59,7 @@ func (h *HttpUserHandler) Login(c fiber.Ctx) error {
 }
 
 // Get my user
-func (h *HttpUserHandler) GetUser(c fiber.Ctx) error {
+func (h *HttpUserHandler) GetUser(c *fiber.Ctx) error {
 	userID := c.Locals("user_id")
 	if userID == nil {
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "unauthorized"})
@@ -80,7 +80,7 @@ func (h *HttpUserHandler) GetUser(c fiber.Ctx) error {
 }
 
 // Get user by ID
-func (h *HttpUserHandler) FindUserByID(c fiber.Ctx) error {
+func (h *HttpUserHandler) FindUserByID(c *fiber.Ctx) error {
 	id := c.Params("id")
 	if id == "" {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "id is required"})
@@ -102,7 +102,7 @@ func (h *HttpUserHandler) FindUserByID(c fiber.Ctx) error {
 }
 
 // Get all users
-func (h *HttpUserHandler) FindAllUsers(c fiber.Ctx) error {
+func (h *HttpUserHandler) FindAllUsers(c *fiber.Ctx) error {
 	users, err := h.userUseCase.FindAllUsers()
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "internal server error"})

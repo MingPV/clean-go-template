@@ -5,7 +5,7 @@ import (
 	middleware "github.com/MingPV/clean-go-template/pkg/middleware"
 	userUsecases "github.com/MingPV/clean-go-template/usecases/user"
 
-	"github.com/gofiber/fiber/v3"
+	"github.com/gofiber/fiber/v2"
 	"gorm.io/gorm"
 )
 

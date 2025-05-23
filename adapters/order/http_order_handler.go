@@ -5,7 +5,7 @@ import (
 
 	"github.com/MingPV/clean-go-template/entities"
 	usecases "github.com/MingPV/clean-go-template/usecases/order"
-	"github.com/gofiber/fiber/v3"
+	"github.com/gofiber/fiber/v2"
 )
 
 type HttpOrderHandler struct {
@@ -16,10 +16,10 @@ func NewHttpOrderHandler(useCase usecases.OrderUseCase) *HttpOrderHandler {
 	return &HttpOrderHandler{orderUseCase: useCase}
 }
 
-func (h *HttpOrderHandler) CreateOrder(c fiber.Ctx) error {
+func (h *HttpOrderHandler) CreateOrder(c *fiber.Ctx) error {
 	// var order entities.Order
 	order := &entities.Order{}
-	if err := c.Bind().Body(&order); err != nil {
+	if err := c.BodyParser(order); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "invalid request"})
 	}
 
@@ -30,7 +30,7 @@ func (h *HttpOrderHandler) CreateOrder(c fiber.Ctx) error {
 	return c.Status(fiber.StatusCreated).JSON(order)
 }
 
-func (h *HttpOrderHandler) FindAllOrders(c fiber.Ctx) error {
+func (h *HttpOrderHandler) FindAllOrders(c *fiber.Ctx) error {
 	orders, err := h.orderUseCase.FindAllOrders()
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
@@ -39,7 +39,7 @@ func (h *HttpOrderHandler) FindAllOrders(c fiber.Ctx) error {
 	return c.JSON(orders)
 }
 
-func (h *HttpOrderHandler) FindOrderByID(c fiber.Ctx) error {
+func (h *HttpOrderHandler) FindOrderByID(c *fiber.Ctx) error {
 	id := c.Params("id")
 	if id == "" {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "id is required"})
@@ -59,7 +59,7 @@ func (h *HttpOrderHandler) FindOrderByID(c fiber.Ctx) error {
 	return c.JSON(order)
 }
 
-func (h *HttpOrderHandler) PatchOrder(c fiber.Ctx) error {
+func (h *HttpOrderHandler) PatchOrder(c *fiber.Ctx) error {
 	id := c.Params("id")
 	if id == "" {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "id is required"})
@@ -72,7 +72,7 @@ func (h *HttpOrderHandler) PatchOrder(c fiber.Ctx) error {
 	}
 
 	order := &entities.Order{}
-	if err := c.Bind().Body(&order); err != nil {
+	if err := c.BodyParser(&order); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "invalid request"})
 	}
 
@@ -90,7 +90,7 @@ func (h *HttpOrderHandler) PatchOrder(c fiber.Ctx) error {
 	return c.JSON(updatedOrder)
 }
 
-func (h *HttpOrderHandler) DeleteOrder(c fiber.Ctx) error {
+func (h *HttpOrderHandler) DeleteOrder(c *fiber.Ctx) error {
 	id := c.Params("id")
 	if id == "" {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "id is required"})
