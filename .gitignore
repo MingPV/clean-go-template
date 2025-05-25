@@ -1,34 +1,56 @@
-# Go build artifacts
+# Binaries for programs and plugins
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Test binary, coverage file
+*.test
+*.out
+*.prof
+
+# Output of the go build command
 /bin/
 /build/
 /dist/
-*.exe
-*.test
-*.out
 
-# Dependency directories
+# Vendor directory (if you use vendoring)
 /vendor/
 
-# Go modules cache
-go.sum
+# Go modules files (can be committed or ignored; usually commit go.mod and go.sum)
+/go.sum
 
 # IDE/editor settings
 .vscode/
 .idea/
 *.swp
+*.swo
 
 # Logs
 *.log
 
-# Env files
+# Environment variables files
 .env
 .env.*
-
 !.env.example
 
-# Postgres volume (optional if mounted locally)
-postgres_data/
-
-# OS-specific files
+# OS generated files
 .DS_Store
 Thumbs.db
+
+# Temporary files
+*.tmp
+*.temp
+
+# Dependency directories created by dep or other package managers (optional)
+Godeps/
+
+# Coverage reports
+coverage.out
+
+# Static analysis output (optional)
+/reports/
+
+# If using build cache directories
+/pkg/
