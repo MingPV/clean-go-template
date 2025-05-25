@@ -5,6 +5,7 @@ import (
 	"strconv"
 
 	"github.com/MingPV/clean-go-template/entities"
+	response "github.com/MingPV/clean-go-template/pkg/responses"
 	usecases "github.com/MingPV/clean-go-template/usecases/user"
 	"github.com/gofiber/fiber/v2"
 )
@@ -24,17 +25,17 @@ func NewHttpUserHandler(useCase usecases.UserUseCase) *HttpUserHandler {
 // @Produce json
 // @Param user body entities.User true "User registration payload"
 // @Success 201 {object} entities.User
-// @Failure 400 {object} map[string]string "Invalid request payload or user already exists"
-// @Failure 500 {object} map[string]string "Internal server error"
 // @Router /auth/signup [post]
 func (h *HttpUserHandler) Register(c *fiber.Ctx) error {
 	user := &entities.User{}
 	if err := c.BodyParser(&user); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "invalid request"})
+		return response.Error(c, fiber.StatusBadRequest, "invalid request")
+
 	}
 
 	if err := h.userUseCase.Register(user); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
+		return response.Error(c, fiber.StatusBadRequest, err.Error())
+
 	}
 
 	// Clear password before returning
@@ -50,9 +51,6 @@ func (h *HttpUserHandler) Register(c *fiber.Ctx) error {
 // @Produce json
 // @Param credentials body map[string]string true "Login credentials (email & password)"
 // @Success 200 {object} map[string]interface{} "Authenticated user and JWT token"
-// @Failure 400 {object} map[string]string "Invalid request payload"
-// @Failure 401 {object} map[string]string "Invalid email or password"
-// @Failure 500 {object} map[string]string "Internal server error"
 // @Router /auth/signin [post]
 func (h *HttpUserHandler) Login(c *fiber.Ctx) error {
 	loginReq := struct {
@@ -61,12 +59,13 @@ func (h *HttpUserHandler) Login(c *fiber.Ctx) error {
 	}{}
 
 	if err := c.BodyParser(&loginReq); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "invalid request"})
+		return response.Error(c, fiber.StatusBadRequest, "invalid request")
+
 	}
 
 	token, user, err := h.userUseCase.Login(loginReq.Email, loginReq.Password)
 	if err != nil {
-		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "invalid email or password"})
+		return response.Error(c, fiber.StatusUnauthorized, "invalid email or password")
 	}
 
 	user.Password = ""
@@ -82,25 +81,21 @@ func (h *HttpUserHandler) Login(c *fiber.Ctx) error {
 // @Tags users
 // @Produce json
 // @Success 200 {object} entities.User
-// @Failure 401 {object} map[string]string "Unauthorized - missing or invalid token"
-// @Failure 400 {object} map[string]string "Invalid user ID from token"
-// @Failure 404 {object} map[string]string "User not found"
-// @Failure 500 {object} map[string]string "Internal server error"
 // @Router /users/me [get]
 func (h *HttpUserHandler) GetUser(c *fiber.Ctx) error {
 	userID := c.Locals("user_id")
 	if userID == nil {
-		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "unauthorized"})
+		return response.Error(c, fiber.StatusUnauthorized, "invalid email or password")
 	}
 
 	id, err := strconv.Atoi(fmt.Sprint(userID))
 	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "invalid user ID"})
+		return response.Error(c, fiber.StatusBadRequest, "invalid user id")
 	}
 
 	user, err := h.userUseCase.FindUserByID(uint(id))
 	if err != nil {
-		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "user not found"})
+		return response.Error(c, fiber.StatusNotFound, "user not found")
 	}
 
 	user.Password = ""
@@ -113,25 +108,22 @@ func (h *HttpUserHandler) GetUser(c *fiber.Ctx) error {
 // @Produce json
 // @Param id path int true "User ID"
 // @Success 200 {object} entities.User
-// @Failure 400 {object} map[string]string "Invalid or missing user ID"
-// @Failure 404 {object} map[string]string "User not found"
-// @Failure 500 {object} map[string]string "Internal server error"
 // @Router /users/{id} [get]
 func (h *HttpUserHandler) FindUserByID(c *fiber.Ctx) error {
 	id := c.Params("id")
 	if id == "" {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "id is required"})
+		return response.Error(c, fiber.StatusBadRequest, "id is required")
 	}
 
 	// Convert id to int
 	userID, err := strconv.Atoi(id)
 	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "invalid id"})
+		return response.Error(c, fiber.StatusBadRequest, "invalid user id")
 	}
 
 	user, err := h.userUseCase.FindUserByID(uint(userID))
 	if err != nil {
-		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "user not found"})
+		return response.Error(c, fiber.StatusNotFound, "user not found")
 	}
 
 	user.Password = ""
@@ -143,12 +135,11 @@ func (h *HttpUserHandler) FindUserByID(c *fiber.Ctx) error {
 // @Tags users
 // @Produce json
 // @Success 200 {array} entities.User
-// @Failure 500 {object} map[string]string "Internal server error"
 // @Router /users [get]
 func (h *HttpUserHandler) FindAllUsers(c *fiber.Ctx) error {
 	users, err := h.userUseCase.FindAllUsers()
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "internal server error"})
+		return response.Error(c, fiber.StatusInternalServerError, "internal server error")
 	}
 
 	for i := range users {

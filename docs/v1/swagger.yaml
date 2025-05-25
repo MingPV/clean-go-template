@@ -18,6 +18,12 @@ definitions:
       password:
         type: string
     type: object
+  response.MessageResponse:
+    properties:
+      message:
+        example: example message
+        type: string
+    type: object
 host: localhost:8000
 info:
   contact: {}
@@ -46,24 +52,6 @@ paths:
           schema:
             additionalProperties: true
             type: object
-        "400":
-          description: Invalid request payload
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "401":
-          description: Invalid email or password
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "500":
-          description: Internal server error
-          schema:
-            additionalProperties:
-              type: string
-            type: object
       summary: Authenticate user and return token
       tags:
       - users
@@ -85,18 +73,6 @@ paths:
           description: Created
           schema:
             $ref: '#/definitions/entities.User'
-        "400":
-          description: Invalid request payload or user already exists
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "500":
-          description: Internal server error
-          schema:
-            additionalProperties:
-              type: string
-            type: object
       summary: Register a new user
       tags:
       - users
@@ -111,12 +87,6 @@ paths:
             items:
               $ref: '#/definitions/entities.Order'
             type: array
-        "500":
-          description: Internal Server Error
-          schema:
-            additionalProperties:
-              type: string
-            type: object
       summary: Get all orders
       tags:
       - orders
@@ -137,18 +107,6 @@ paths:
           description: Created
           schema:
             $ref: '#/definitions/entities.Order'
-        "400":
-          description: Bad Request
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "500":
-          description: Internal Server Error
-          schema:
-            additionalProperties:
-              type: string
-            type: object
       summary: Create a new order
       tags:
       - orders
@@ -166,21 +124,7 @@ paths:
         "200":
           description: OK
           schema:
-            additionalProperties:
-              type: string
-            type: object
-        "400":
-          description: Bad Request
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "500":
-          description: Internal Server Error
-          schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/response.MessageResponse'
       summary: Delete an order by ID
       tags:
       - orders
@@ -198,18 +142,6 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/entities.Order'
-        "400":
-          description: Bad Request
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "500":
-          description: Internal Server Error
-          schema:
-            additionalProperties:
-              type: string
-            type: object
       summary: Get order by ID
       tags:
       - orders
@@ -235,18 +167,6 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/entities.Order'
-        "400":
-          description: Bad Request
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "500":
-          description: Internal Server Error
-          schema:
-            additionalProperties:
-              type: string
-            type: object
       summary: Update an order partially
       tags:
       - orders
@@ -261,12 +181,6 @@ paths:
             items:
               $ref: '#/definitions/entities.User'
             type: array
-        "500":
-          description: Internal server error
-          schema:
-            additionalProperties:
-              type: string
-            type: object
       summary: Get all users
       tags:
       - users
@@ -285,24 +199,6 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/entities.User'
-        "400":
-          description: Invalid or missing user ID
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "404":
-          description: User not found
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "500":
-          description: Internal server error
-          schema:
-            additionalProperties:
-              type: string
-            type: object
       summary: Get user by ID
       tags:
       - users
@@ -315,30 +211,6 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/entities.User'
-        "400":
-          description: Invalid user ID from token
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "401":
-          description: Unauthorized - missing or invalid token
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "404":
-          description: User not found
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "500":
-          description: Internal server error
-          schema:
-            additionalProperties:
-              type: string
-            type: object
       summary: Get currently authenticated user
       tags:
       - users
