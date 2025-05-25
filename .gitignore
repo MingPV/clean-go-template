@@ -24,6 +24,8 @@ go.sum
 .env
 .env.*
 
+!.env.example
+
 # Postgres volume (optional if mounted locally)
 postgres_data/
 
