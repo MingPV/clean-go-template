@@ -15,78 +15,47 @@ import (
 
 func SetupApp(env string) (*fiber.App, string) {
 
-	if env != "test" {
-		// Load config
-		cfg := config.LoadConfig(env)
+	// Load config
+	cfg := config.LoadConfig(env)
 
-		// Setup Fiber
-		app := fiber.New()
+	// Setup Fiber
+	app := fiber.New()
 
-		// Middleware
-		middleware.FiberMiddleware(app)
+	// Middleware
+	middleware.FiberMiddleware(app)
 
-		// Database
-		db, err := database.Connect(cfg.DatabaseDSN)
-		if err != nil {
-			log.Fatalf("failed to connect database: %v", err)
-		}
+	// Database
+	db, err := database.Connect(cfg.DatabaseDSN)
+	if err != nil {
+		log.Fatalf("failed to connect database: %v", err)
+	}
 
-		// Migrate entities
-		if err := db.AutoMigrate(&entities.Order{}, &entities.User{}); err != nil {
-			log.Fatalf("failed to migrate database: %v", err)
-		}
-
-		// Redis
-		if err := redisclient.InitRedisClient(cfg.RedisAddress); err != nil {
-			log.Printf("redis not available: %v", err)
-		}
-
-		// Swagger
-		routes.SwaggerRoute(app)
-
-		// Routes
-		routes.RegisterPublicRoutes(app, db)
-		routes.RegisterPrivateRoutes(app, db)
-		routes.RegisterNotFoundRoute(app)
-
-		return app, cfg.AppPort
-	} else {
-		// Load config
-		cfg := config.LoadConfig(env)
-
-		// Setup Fiber
-		app := fiber.New()
-
-		// Middleware
-		middleware.FiberMiddleware(app)
-
-		// Database
-		db, err := database.Connect(cfg.DatabaseDSN)
-		if err != nil {
-			log.Fatalf("failed to connect database: %v", err)
-		}
-
-		// Migrate entities
+	// Drop tables in test environment
+	if env == "test" {
 		if err := db.Migrator().DropTable(&entities.Order{}, &entities.User{}); err != nil {
 			log.Fatalf("failed to drop table: %v", err)
 		}
-		if err := db.AutoMigrate(&entities.Order{}, &entities.User{}); err != nil {
-			log.Fatalf("failed to migrate database: %v", err)
-		}
-
-		// Redis
-		if err := redisclient.InitRedisClient(cfg.RedisAddress); err != nil {
-			log.Printf("redis not available: %v", err)
-		}
-
-		// No Swagger
-
-		// Routes
-		routes.RegisterPublicRoutes(app, db)
-		routes.RegisterPrivateRoutes(app, db)
-		routes.RegisterNotFoundRoute(app)
-
-		return app, cfg.AppPort
 	}
+	// Migrate entities
+	if err := db.AutoMigrate(&entities.Order{}, &entities.User{}); err != nil {
+		log.Fatalf("failed to migrate database: %v", err)
+	}
+
+	// Redis
+	if err := redisclient.InitRedisClient(cfg.RedisAddress); err != nil {
+		log.Printf("redis not available: %v", err)
+	}
+
+	// No Swagger when testing
+	if env != "test" {
+		routes.SwaggerRoute(app)
+	}
+
+	// Routes
+	routes.RegisterPublicRoutes(app, db)
+	routes.RegisterPrivateRoutes(app, db)
+	routes.RegisterNotFoundRoute(app)
+
+	return app, cfg.AppPort
 
 }
