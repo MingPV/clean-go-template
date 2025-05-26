@@ -71,7 +71,7 @@ func (h *HttpOrderHandler) FindOrderByID(c *fiber.Ctx) error {
 
 	order, err := h.orderUseCase.FindOrderByID(orderID)
 	if err != nil {
-		return responses.Error(c, fiber.StatusInternalServerError, err.Error())
+		return responses.Error(c, fiber.StatusNotFound, err.Error())
 	}
 
 	return c.JSON(dto.ToOrderResponse(order))

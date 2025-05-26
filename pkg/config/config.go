@@ -29,9 +29,18 @@ type Config struct {
 	RedisAddress string
 }
 
-func LoadConfig() *Config {
-	if err := godotenv.Load(); err != nil {
-		log.Println("No .env file found, using system env")
+func LoadConfig(env string) *Config {
+
+	envFile := ".env"
+	if env != "" {
+		envFile = ".env." + env
+	}
+
+	// .env.test is already loaded in test files
+	if env != "test" {
+		if err := godotenv.Load(envFile); err != nil {
+			log.Println("No .env file found, using system env", err)
+		}
 	}
 
 	jwtExp := getEnvAsInt("JWT_EXPIRATION", 3600)

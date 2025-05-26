@@ -7,7 +7,7 @@ import (
 )
 
 func Start() {
-	app, port := SetupApp()
+	app, port := SetupApp("dev")
 
 	// Graceful shutdown
 	utils.StartServerWithGracefulShutdown(app, ":"+port)
