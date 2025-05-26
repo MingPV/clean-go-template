@@ -6,6 +6,6 @@ import "github.com/MingPV/clean-go-template/internal/entities"
 type UserUseCase interface {
 	Register(user *entities.User) error
 	Login(email, password string) (string, *entities.User, error)
-	FindUserByID(id uint) (*entities.User, error)
-	FindAllUsers() ([]entities.User, error)
+	FindUserByID(id string) (*entities.User, error)
+	FindAllUsers() ([]*entities.User, error)
 }

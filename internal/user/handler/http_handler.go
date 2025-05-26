@@ -2,9 +2,8 @@ package handler
 
 import (
 	"fmt"
-	"strconv"
 
-	"github.com/MingPV/clean-go-template/internal/entities"
+	"github.com/MingPV/clean-go-template/internal/user/dto"
 	"github.com/MingPV/clean-go-template/internal/user/usecase"
 	response "github.com/MingPV/clean-go-template/pkg/responses"
 	"github.com/gofiber/fiber/v2"
@@ -27,21 +26,17 @@ func NewHttpUserHandler(useCase usecase.UserUseCase) *HttpUserHandler {
 // @Success 201 {object} entities.User
 // @Router /auth/signup [post]
 func (h *HttpUserHandler) Register(c *fiber.Ctx) error {
-	user := &entities.User{}
-	if err := c.BodyParser(&user); err != nil {
+	req := new(dto.RegisterRequest)
+	if err := c.BodyParser(req); err != nil {
 		return response.Error(c, fiber.StatusBadRequest, "invalid request")
-
 	}
 
-	if err := h.userUseCase.Register(user); err != nil {
+	userEntity := dto.ToUserEntity(req)
+	if err := h.userUseCase.Register(userEntity); err != nil {
 		return response.Error(c, fiber.StatusBadRequest, err.Error())
-
 	}
 
-	// Clear password before returning
-	user.Password = ""
-
-	return c.Status(fiber.StatusCreated).JSON(user)
+	return c.Status(fiber.StatusCreated).JSON(dto.ToUserResponse(userEntity))
 }
 
 // Login godoc
@@ -53,25 +48,18 @@ func (h *HttpUserHandler) Register(c *fiber.Ctx) error {
 // @Success 200 {object} map[string]interface{} "Authenticated user and JWT token"
 // @Router /auth/signin [post]
 func (h *HttpUserHandler) Login(c *fiber.Ctx) error {
-	loginReq := struct {
-		Email    string `json:"email"`
-		Password string `json:"password"`
-	}{}
-
-	if err := c.BodyParser(&loginReq); err != nil {
+	loginReq := new(dto.LoginRequest)
+	if err := c.BodyParser(loginReq); err != nil {
 		return response.Error(c, fiber.StatusBadRequest, "invalid request")
-
 	}
 
-	token, user, err := h.userUseCase.Login(loginReq.Email, loginReq.Password)
+	token, userEntity, err := h.userUseCase.Login(loginReq.Email, loginReq.Password)
 	if err != nil {
 		return response.Error(c, fiber.StatusUnauthorized, "invalid email or password")
 	}
 
-	user.Password = ""
-
 	return c.JSON(fiber.Map{
-		"user":  user,
+		"user":  dto.ToUserResponse(userEntity),
 		"token": token,
 	})
 }
@@ -85,21 +73,17 @@ func (h *HttpUserHandler) Login(c *fiber.Ctx) error {
 func (h *HttpUserHandler) GetUser(c *fiber.Ctx) error {
 	userID := c.Locals("user_id")
 	if userID == nil {
-		return response.Error(c, fiber.StatusUnauthorized, "invalid email or password")
+		return response.Error(c, fiber.StatusUnauthorized, "invalid user id")
 	}
 
-	id, err := strconv.Atoi(fmt.Sprint(userID))
-	if err != nil {
-		return response.Error(c, fiber.StatusBadRequest, "invalid user id")
-	}
+	fmt.Println(fmt.Sprint(userID))
 
-	user, err := h.userUseCase.FindUserByID(uint(id))
+	userEntity, err := h.userUseCase.FindUserByID(fmt.Sprint(userID))
 	if err != nil {
 		return response.Error(c, fiber.StatusNotFound, "user not found")
 	}
 
-	user.Password = ""
-	return c.JSON(user)
+	return c.JSON(dto.ToUserResponse(userEntity))
 }
 
 // FindUserByID godoc
@@ -115,19 +99,12 @@ func (h *HttpUserHandler) FindUserByID(c *fiber.Ctx) error {
 		return response.Error(c, fiber.StatusBadRequest, "id is required")
 	}
 
-	// Convert id to int
-	userID, err := strconv.Atoi(id)
-	if err != nil {
-		return response.Error(c, fiber.StatusBadRequest, "invalid user id")
-	}
-
-	user, err := h.userUseCase.FindUserByID(uint(userID))
+	userEntity, err := h.userUseCase.FindUserByID(id)
 	if err != nil {
 		return response.Error(c, fiber.StatusNotFound, "user not found")
 	}
 
-	user.Password = ""
-	return c.JSON(user)
+	return c.JSON(dto.ToUserResponse(userEntity))
 }
 
 // FindAllUsers godoc
@@ -142,9 +119,5 @@ func (h *HttpUserHandler) FindAllUsers(c *fiber.Ctx) error {
 		return response.Error(c, fiber.StatusInternalServerError, "internal server error")
 	}
 
-	for i := range users {
-		users[i].Password = ""
-	}
-
-	return c.JSON(users)
+	return c.JSON(dto.ToUserResponseList(users))
 }

@@ -35,7 +35,7 @@ func (s *OrderService) CreateOrder(order *entities.Order) error {
 }
 
 // OrderService Methods - 2 find all
-func (s *OrderService) FindAllOrders() ([]entities.Order, error) {
+func (s *OrderService) FindAllOrders() ([]*entities.Order, error) {
 	orders, err := s.repo.FindAll()
 	if err != nil {
 		return nil, err
@@ -44,7 +44,7 @@ func (s *OrderService) FindAllOrders() ([]entities.Order, error) {
 }
 
 // OrderService Methods - 3 find by id
-func (s *OrderService) FindOrderByID(id int) (entities.Order, error) {
+func (s *OrderService) FindOrderByID(id int) (*entities.Order, error) {
 
 	// Check if the order is in the cache
 	jsonData, err := redisclient.Get("order:" + strconv.Itoa(id))
@@ -52,12 +52,12 @@ func (s *OrderService) FindOrderByID(id int) (entities.Order, error) {
 		var order entities.Order
 		json.Unmarshal([]byte(jsonData), &order)
 		// fmt.Println("Cache hit, returning from cache")
-		return order, nil
+		return &order, nil
 	}
 
 	order, err := s.repo.FindByID(id)
 	if err != nil {
-		return entities.Order{}, err
+		return &entities.Order{}, err
 	}
 
 	// If not found in the cache, save it to the cache

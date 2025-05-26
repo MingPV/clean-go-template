@@ -17,20 +17,25 @@ func (r *GormOrderRepository) Save(order *entities.Order) error {
 	return r.db.Create(&order).Error
 }
 
-func (r *GormOrderRepository) FindAll() ([]entities.Order, error) {
-	var orders []entities.Order
-	if err := r.db.Find(&orders).Error; err != nil {
+func (r *GormOrderRepository) FindAll() ([]*entities.Order, error) {
+	var orderValues []entities.Order
+	if err := r.db.Find(&orderValues).Error; err != nil {
 		return nil, err
+	}
+
+	orders := make([]*entities.Order, len(orderValues))
+	for i := range orderValues {
+		orders[i] = &orderValues[i]
 	}
 	return orders, nil
 }
 
-func (r *GormOrderRepository) FindByID(id int) (entities.Order, error) {
+func (r *GormOrderRepository) FindByID(id int) (*entities.Order, error) {
 	var order entities.Order
 	if err := r.db.First(&order, id).Error; err != nil {
-		return entities.Order{}, err
+		return &entities.Order{}, err
 	}
-	return order, nil
+	return &order, nil
 }
 
 func (r *GormOrderRepository) Patch(id int, order *entities.Order) error {

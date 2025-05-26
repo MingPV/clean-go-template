@@ -4,8 +4,9 @@ import (
 	"strconv"
 
 	"github.com/MingPV/clean-go-template/internal/entities"
+	"github.com/MingPV/clean-go-template/internal/order/dto"
 	"github.com/MingPV/clean-go-template/internal/order/usecase"
-	response "github.com/MingPV/clean-go-template/pkg/responses"
+	responses "github.com/MingPV/clean-go-template/pkg/responses"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -26,17 +27,17 @@ func NewHttpOrderHandler(useCase usecase.OrderUseCase) *HttpOrderHandler {
 // @Success 201 {object} entities.Order
 // @Router /orders [post]
 func (h *HttpOrderHandler) CreateOrder(c *fiber.Ctx) error {
-	// var order entities.Order
-	order := &entities.Order{}
-	if err := c.BodyParser(order); err != nil {
-		return response.Error(c, fiber.StatusBadRequest, "invalid request")
+	var req dto.CreateOrderRequest
+	if err := c.BodyParser(&req); err != nil {
+		return responses.Error(c, fiber.StatusBadRequest, "invalid request")
 	}
 
+	order := &entities.Order{Total: req.Total}
 	if err := h.orderUseCase.CreateOrder(order); err != nil {
-		return response.Error(c, fiber.StatusInternalServerError, err.Error())
+		return responses.Error(c, fiber.StatusInternalServerError, err.Error())
 	}
 
-	return c.Status(fiber.StatusCreated).JSON(order)
+	return c.Status(fiber.StatusCreated).JSON(dto.ToOrderResponse(order))
 }
 
 // FindAllOrders godoc
@@ -48,10 +49,10 @@ func (h *HttpOrderHandler) CreateOrder(c *fiber.Ctx) error {
 func (h *HttpOrderHandler) FindAllOrders(c *fiber.Ctx) error {
 	orders, err := h.orderUseCase.FindAllOrders()
 	if err != nil {
-		return response.Error(c, fiber.StatusInternalServerError, err.Error())
+		return responses.Error(c, fiber.StatusInternalServerError, err.Error())
 	}
 
-	return c.JSON(orders)
+	return c.JSON(dto.ToOrderResponseList(orders))
 }
 
 // FindOrderByID godoc
@@ -63,22 +64,17 @@ func (h *HttpOrderHandler) FindAllOrders(c *fiber.Ctx) error {
 // @Router /orders/{id} [get]
 func (h *HttpOrderHandler) FindOrderByID(c *fiber.Ctx) error {
 	id := c.Params("id")
-	if id == "" {
-		return response.Error(c, fiber.StatusBadRequest, "id is required")
-	}
-
-	// Convert id to int
 	orderID, err := strconv.Atoi(id)
 	if err != nil {
-		return response.Error(c, fiber.StatusBadRequest, "invalid id")
+		return responses.Error(c, fiber.StatusBadRequest, "invalid id")
 	}
 
 	order, err := h.orderUseCase.FindOrderByID(orderID)
 	if err != nil {
-		return response.Error(c, fiber.StatusInternalServerError, err.Error())
+		return responses.Error(c, fiber.StatusInternalServerError, err.Error())
 	}
 
-	return c.JSON(order)
+	return c.JSON(dto.ToOrderResponse(order))
 }
 
 // PatchOrder godoc
@@ -92,33 +88,27 @@ func (h *HttpOrderHandler) FindOrderByID(c *fiber.Ctx) error {
 // @Router /orders/{id} [patch]
 func (h *HttpOrderHandler) PatchOrder(c *fiber.Ctx) error {
 	id := c.Params("id")
-	if id == "" {
-		return response.Error(c, fiber.StatusBadRequest, "id is required")
-	}
-
-	// Convert id to int
 	orderID, err := strconv.Atoi(id)
 	if err != nil {
-		return response.Error(c, fiber.StatusBadRequest, "invalid id")
+		return responses.Error(c, fiber.StatusBadRequest, "invalid id")
 	}
 
-	order := &entities.Order{}
-	if err := c.BodyParser(&order); err != nil {
-		return response.Error(c, fiber.StatusBadRequest, "invalid request")
+	var req dto.CreateOrderRequest
+	if err := c.BodyParser(&req); err != nil {
+		return responses.Error(c, fiber.StatusBadRequest, "invalid request")
 	}
 
-	// Patch Order
+	order := &entities.Order{Total: req.Total}
 	if err := h.orderUseCase.PatchOrder(orderID, order); err != nil {
-		return response.Error(c, fiber.StatusInternalServerError, err.Error())
+		return responses.Error(c, fiber.StatusInternalServerError, err.Error())
 	}
 
-	// Fetch the updated order
 	updatedOrder, err := h.orderUseCase.FindOrderByID(orderID)
 	if err != nil {
-		return response.Error(c, fiber.StatusInternalServerError, err.Error())
+		return responses.Error(c, fiber.StatusInternalServerError, err.Error())
 	}
 
-	return c.JSON(updatedOrder)
+	return c.JSON(dto.ToOrderResponse(updatedOrder))
 }
 
 // DeleteOrder godoc
@@ -130,19 +120,14 @@ func (h *HttpOrderHandler) PatchOrder(c *fiber.Ctx) error {
 // @Router /orders/{id} [delete]
 func (h *HttpOrderHandler) DeleteOrder(c *fiber.Ctx) error {
 	id := c.Params("id")
-	if id == "" {
-		return response.Error(c, fiber.StatusBadRequest, "id is required")
-	}
-
-	// Convert id to int
 	orderID, err := strconv.Atoi(id)
 	if err != nil {
-		return response.Error(c, fiber.StatusBadRequest, "invalid id")
+		return responses.Error(c, fiber.StatusBadRequest, "invalid id")
 	}
 
 	if err := h.orderUseCase.DeleteOrder(orderID); err != nil {
-		return response.Error(c, fiber.StatusInternalServerError, err.Error())
+		return responses.Error(c, fiber.StatusInternalServerError, err.Error())
 	}
 
-	return response.Message(c, fiber.StatusOK, "order deleted")
+	return responses.Message(c, fiber.StatusOK, "order deleted")
 }

@@ -76,12 +76,12 @@ func (s *UserService) Login(email string, password string) (string, *entities.Us
 }
 
 // Get user by ID
-func (s *UserService) FindUserByID(id uint) (*entities.User, error) {
+func (s *UserService) FindUserByID(id string) (*entities.User, error) {
 	return s.repo.FindByID(id)
 }
 
 // Get all users
-func (s *UserService) FindAllUsers() ([]entities.User, error) {
+func (s *UserService) FindAllUsers() ([]*entities.User, error) {
 	users, err := s.repo.FindAll()
 	if err != nil {
 		return nil, err
