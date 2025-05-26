@@ -1,6 +1,6 @@
-package usecases
+package repository
 
-import "github.com/MingPV/clean-go-template/entities"
+import "github.com/MingPV/clean-go-template/internal/entities"
 
 type OrderRepository interface {
 	Save(order *entities.Order) error

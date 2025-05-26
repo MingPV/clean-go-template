@@ -1,8 +1,7 @@
-package adapters
+package repository
 
 import (
-	"github.com/MingPV/clean-go-template/entities"
-	usecases "github.com/MingPV/clean-go-template/usecases/order"
+	"github.com/MingPV/clean-go-template/internal/entities"
 	"gorm.io/gorm"
 )
 
@@ -10,7 +9,7 @@ type GormOrderRepository struct {
 	db *gorm.DB
 }
 
-func NewGormOrderRepository(db *gorm.DB) usecases.OrderRepository {
+func NewGormOrderRepository(db *gorm.DB) OrderRepository {
 	return &GormOrderRepository{db: db}
 }
 

@@ -1,4 +1,4 @@
-package usecases
+package usecase
 
 import (
 	"encoding/json"
@@ -6,26 +6,18 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/MingPV/clean-go-template/entities"
+	"github.com/MingPV/clean-go-template/internal/entities"
+	"github.com/MingPV/clean-go-template/internal/order/repository"
 	"github.com/MingPV/clean-go-template/pkg/redisclient"
 )
 
-// Tell what OrderService can do
-type OrderUseCase interface {
-	FindAllOrders() ([]entities.Order, error)
-	CreateOrder(order *entities.Order) error
-	PatchOrder(id int, order *entities.Order) error
-	DeleteOrder(id int) error
-	FindOrderByID(id int) (entities.Order, error)
-}
-
 // OrderService
 type OrderService struct {
-	repo OrderRepository
+	repo repository.OrderRepository
 }
 
 // Init OrderService function
-func NewOrderService(repo OrderRepository) OrderUseCase {
+func NewOrderService(repo repository.OrderRepository) OrderUseCase {
 	return &OrderService{repo: repo}
 }
 

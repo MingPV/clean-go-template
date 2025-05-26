@@ -1,10 +1,9 @@
-package adapters
+package repository
 
 import (
 	"errors"
 
-	"github.com/MingPV/clean-go-template/entities"
-	usecases "github.com/MingPV/clean-go-template/usecases/user"
+	"github.com/MingPV/clean-go-template/internal/entities"
 	"gorm.io/gorm"
 )
 
@@ -12,7 +11,7 @@ type GormUserRepository struct {
 	db *gorm.DB
 }
 
-func NewGormUserRepository(db *gorm.DB) usecases.UserRepository {
+func NewGormUserRepository(db *gorm.DB) UserRepository {
 	return &GormUserRepository{db: db}
 }
 

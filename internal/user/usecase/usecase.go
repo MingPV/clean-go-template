@@ -1,4 +1,4 @@
-package usecases
+package usecase
 
 import (
 	"errors"
@@ -6,26 +6,27 @@ import (
 	"os"
 	"time"
 
-	"github.com/MingPV/clean-go-template/entities"
+	"github.com/MingPV/clean-go-template/internal/entities"
+	"github.com/MingPV/clean-go-template/internal/user/repository"
 	"github.com/golang-jwt/jwt/v5"
 	"golang.org/x/crypto/bcrypt"
 )
 
 // What UserService can do
-type UserUseCase interface {
-	Register(user *entities.User) error
-	Login(email, password string) (string, *entities.User, error)
-	FindUserByID(id uint) (*entities.User, error)
-	FindAllUsers() ([]entities.User, error)
-}
+// type UserUseCase interface {
+// 	Register(user *entities.User) error
+// 	Login(email, password string) (string, *entities.User, error)
+// 	FindUserByID(id uint) (*entities.User, error)
+// 	FindAllUsers() ([]entities.User, error)
+// }
 
 // UserService struct
 type UserService struct {
-	repo UserRepository
+	repo repository.UserRepository
 }
 
 // Init UserService
-func NewUserService(repo UserRepository) UserUseCase {
+func NewUserService(repo repository.UserRepository) UserUseCase {
 	return &UserService{repo: repo}
 }
 

@@ -5,12 +5,14 @@ import (
 	"gorm.io/gorm"
 
 	// Order
-	orderAdapters "github.com/MingPV/clean-go-template/adapters/order"
-	orderUsecases "github.com/MingPV/clean-go-template/usecases/order"
+	orderHandler "github.com/MingPV/clean-go-template/internal/order/handler"
+	orderRepository "github.com/MingPV/clean-go-template/internal/order/repository"
+	orderUseCase "github.com/MingPV/clean-go-template/internal/order/usecase"
 
 	// User
-	userAdapters "github.com/MingPV/clean-go-template/adapters/user"
-	userUsecases "github.com/MingPV/clean-go-template/usecases/user"
+	userHandler "github.com/MingPV/clean-go-template/internal/user/handler"
+	userRepository "github.com/MingPV/clean-go-template/internal/user/repository"
+	userUseCase "github.com/MingPV/clean-go-template/internal/user/usecase"
 )
 
 func RegisterPublicRoutes(app fiber.Router, db *gorm.DB) {
@@ -20,14 +22,14 @@ func RegisterPublicRoutes(app fiber.Router, db *gorm.DB) {
 	// === Dependency Wiring ===
 
 	// Order
-	orderRepo := orderAdapters.NewGormOrderRepository(db)
-	orderService := orderUsecases.NewOrderService(orderRepo)
-	orderHandler := orderAdapters.NewHttpOrderHandler(orderService)
+	orderRepo := orderRepository.NewGormOrderRepository(db)
+	orderService := orderUseCase.NewOrderService(orderRepo)
+	orderHandler := orderHandler.NewHttpOrderHandler(orderService)
 
 	// User
-	userRepo := userAdapters.NewGormUserRepository(db)
-	userService := userUsecases.NewUserService(userRepo)
-	userHandler := userAdapters.NewHttpUserHandler(userService)
+	userRepo := userRepository.NewGormUserRepository(db)
+	userService := userUseCase.NewUserService(userRepo)
+	userHandler := userHandler.NewHttpUserHandler(userService)
 
 	// === Public Routes ===
 

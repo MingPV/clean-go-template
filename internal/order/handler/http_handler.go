@@ -1,19 +1,19 @@
-package adapters
+package handler
 
 import (
 	"strconv"
 
-	"github.com/MingPV/clean-go-template/entities"
+	"github.com/MingPV/clean-go-template/internal/entities"
+	"github.com/MingPV/clean-go-template/internal/order/usecase"
 	response "github.com/MingPV/clean-go-template/pkg/responses"
-	usecases "github.com/MingPV/clean-go-template/usecases/order"
 	"github.com/gofiber/fiber/v2"
 )
 
 type HttpOrderHandler struct {
-	orderUseCase usecases.OrderUseCase
+	orderUseCase usecase.OrderUseCase
 }
 
-func NewHttpOrderHandler(useCase usecases.OrderUseCase) *HttpOrderHandler {
+func NewHttpOrderHandler(useCase usecase.OrderUseCase) *HttpOrderHandler {
 	return &HttpOrderHandler{orderUseCase: useCase}
 }
 

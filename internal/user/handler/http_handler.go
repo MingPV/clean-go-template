@@ -1,20 +1,20 @@
-package adapters
+package handler
 
 import (
 	"fmt"
 	"strconv"
 
-	"github.com/MingPV/clean-go-template/entities"
+	"github.com/MingPV/clean-go-template/internal/entities"
+	"github.com/MingPV/clean-go-template/internal/user/usecase"
 	response "github.com/MingPV/clean-go-template/pkg/responses"
-	usecases "github.com/MingPV/clean-go-template/usecases/user"
 	"github.com/gofiber/fiber/v2"
 )
 
 type HttpUserHandler struct {
-	userUseCase usecases.UserUseCase
+	userUseCase usecase.UserUseCase
 }
 
-func NewHttpUserHandler(useCase usecases.UserUseCase) *HttpUserHandler {
+func NewHttpUserHandler(useCase usecase.UserUseCase) *HttpUserHandler {
 	return &HttpUserHandler{userUseCase: useCase}
 }
 
