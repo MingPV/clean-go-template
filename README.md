@@ -50,7 +50,7 @@ Follow the steps below to set up and run the project:
 5. Run the application:
 
     ```bash
-    go run .
+    go run ./cmd/app
     ```
 
 Swagger UI for the API documentation is available at: localhost:8080/api/v1/docs
