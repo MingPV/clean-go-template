@@ -60,5 +60,40 @@ Swagger UI for the API documentation is available at: localhost:8080/api/v1/docs
 <img width="700" alt="image" src="https://github.com/user-attachments/assets/840f8d43-e07c-44a8-9b7d-3f4d62d912ce" />
 
 
+## Project structure
+
+
+```bash
+/clean-go-template
+├── cmd/
+│   └── app/               
+├── docs/
+│   └── v1/                 
+├── internal/               
+│   ├── app/            
+│   ├── entities/
+│   ├── order/
+│   │   ├── handler/ 
+│   │   ├── usecase/
+│   │   ├── repository/
+│   │   └── dto/ 
+│   └── user/               
+├── pkg/
+│   ├── config/
+│   ├── database/
+│   ├── middleware/
+│   ├── redisclient/
+│   ├── responses/
+│   └── routes/
+├── utils/                
+├── .env.example             
+├── .gitignore               
+├── LICENSE                  
+├── README.md             
+├── docker-compose.yaml      
+└── go.mod
+```
+
+
 
 
