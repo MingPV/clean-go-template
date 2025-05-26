@@ -66,7 +66,8 @@ Swagger UI for the API documentation is available at: localhost:8080/api/v1/docs
 ```bash
 /clean-go-template
 ├── cmd/
-│   └── app/               
+│   └── app/
+│       └── main.go               
 ├── docs/
 │   └── v1/                 
 ├── internal/               
