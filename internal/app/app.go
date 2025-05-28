@@ -25,7 +25,7 @@ func SetupRestServer(db *gorm.DB, cfg *config.Config) (*fiber.App, error) {
 	app := fiber.New()
 	middleware.FiberMiddleware(app)
 	// comment out Swagger when testing
-	routes.SwaggerRoute(app)
+	// routes.SwaggerRoute(app)
 	routes.RegisterPublicRoutes(app, db)
 	routes.RegisterPrivateRoutes(app, db)
 	routes.RegisterNotFoundRoute(app)

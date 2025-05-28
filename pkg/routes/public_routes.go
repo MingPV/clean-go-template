@@ -10,7 +10,7 @@ import (
 	orderUseCase "github.com/MingPV/clean-go-template/internal/order/usecase"
 
 	// User
-	userHandler "github.com/MingPV/clean-go-template/internal/user/handler"
+	userHandler "github.com/MingPV/clean-go-template/internal/user/handler/rest"
 	userRepository "github.com/MingPV/clean-go-template/internal/user/repository"
 	userUseCase "github.com/MingPV/clean-go-template/internal/user/usecase"
 )
