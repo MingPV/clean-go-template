@@ -6,7 +6,7 @@
 - **Fiber v2** as a fast and lightweight web framework for building RESTful APIs 
 - **GORM** as the ORM for PostgreSQL database access
 - **Redis** for caching to improve performance and reduce database load
-- **gRPC** for high-performance RPC communication alongside REST API support  
+- **gRPC** for high-performance RPC communication 
 - **Docker Compose** for easy setup of PostgreSQL and Redis services
 
 ## Features
