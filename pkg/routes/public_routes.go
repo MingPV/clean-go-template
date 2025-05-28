@@ -5,7 +5,7 @@ import (
 	"gorm.io/gorm"
 
 	// Order
-	orderHandler "github.com/MingPV/clean-go-template/internal/order/handler"
+	orderHandler "github.com/MingPV/clean-go-template/internal/order/handler/rest"
 	orderRepository "github.com/MingPV/clean-go-template/internal/order/repository"
 	orderUseCase "github.com/MingPV/clean-go-template/internal/order/usecase"
 

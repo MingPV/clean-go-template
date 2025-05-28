@@ -11,6 +11,7 @@ import (
 
 type Config struct {
 	AppPort     string
+	GrpcPort    string
 	AppEnv      string
 	DBHost      string
 	DBPort      string
@@ -36,17 +37,15 @@ func LoadConfig(env string) *Config {
 		envFile = ".env." + env
 	}
 
-	// .env.test is already loaded in test files
-	if env != "test" {
-		if err := godotenv.Load(envFile); err != nil {
-			log.Println("No .env file found, using system env", err)
-		}
+	if err := godotenv.Load(envFile); err != nil {
+		log.Println("No .env file found, using system env", err)
 	}
 
 	jwtExp := getEnvAsInt("JWT_EXPIRATION", 3600)
 
 	cfg := &Config{
 		AppPort:         getEnv("APP_PORT", "8000"),
+		GrpcPort:        getEnv("GRPC_PORT", "50051"),
 		AppEnv:          getEnv("APP_ENV", "development"),
 		DBHost:          getEnv("DB_HOST", "localhost"),
 		DBPort:          getEnv("DB_PORT", "5432"),

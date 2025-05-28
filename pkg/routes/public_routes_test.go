@@ -3,6 +3,7 @@ package routes_test
 import (
 	"bytes"
 	"encoding/json"
+
 	"net/http/httptest"
 	"testing"
 
@@ -19,12 +20,17 @@ func setupTestApp(t *testing.T) *fiber.App {
 		t.Fatalf("Failed to load .env.test: %v", err)
 	}
 
-	app, port := app.SetupApp("test")
-	if port == "" {
-		t.Fatalf("SetupAppWithConfig failed: port is empty")
+	db, _, cfg, err := app.SetupDependencies("test")
+	if err != nil {
+		t.Fatalf("failed to setup dependencies: %v", err)
 	}
 
-	return app
+	restApp, err := app.SetupRestServer(db, cfg)
+	if err != nil {
+		t.Fatalf("failed to setup REST server: %v", err)
+	}
+
+	return restApp
 }
 
 func TestPublicRoutes(t *testing.T) {

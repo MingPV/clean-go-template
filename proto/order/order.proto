@@ -1,0 +1,57 @@
+syntax = "proto3";
+
+package order;
+
+option go_package = "github.com/MingPV/clean-go-template/proto/orderpb";
+
+message Order {
+  int32 id = 1;
+  double total = 2;
+}
+
+message CreateOrderRequest {
+  double total = 1;
+}
+
+message CreateOrderResponse {
+  Order order = 1;
+}
+
+message FindOrderByIDRequest {
+  int32 id = 1;
+}
+
+message FindOrderByIDResponse {
+  Order order = 1;
+}
+
+message FindAllOrdersRequest {}
+
+message FindAllOrdersResponse {
+  repeated Order orders = 1;
+}
+
+message PatchOrderRequest {
+  int32 id = 1;
+  double total = 2;
+}
+
+message PatchOrderResponse {
+  Order order = 1;
+}
+
+message DeleteOrderRequest {
+  int32 id = 1;
+}
+
+message DeleteOrderResponse {
+  string message = 1;
+}
+
+service OrderService {
+  rpc CreateOrder(CreateOrderRequest) returns (CreateOrderResponse);
+  rpc FindOrderByID(FindOrderByIDRequest) returns (FindOrderByIDResponse);
+  rpc FindAllOrders(FindAllOrdersRequest) returns (FindAllOrdersResponse);
+  rpc PatchOrder(PatchOrderRequest) returns (PatchOrderResponse);
+  rpc DeleteOrder(DeleteOrderRequest) returns (DeleteOrderResponse);
+}
