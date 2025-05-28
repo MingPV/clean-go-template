@@ -3,9 +3,10 @@
 
 **go-clean-template** is a clean and scalable starter template for building backend applications in Go, following Clean Architecture principles. This template uses:
 
-- **Fiber v2** as a fast and lightweight web framework
+- **Fiber v2** as a fast and lightweight web framework for building RESTful APIs 
 - **GORM** as the ORM for PostgreSQL database access
 - **Redis** for caching to improve performance and reduce database load
+- **gRPC** for high-performance RPC communication alongside REST API support  
 - **Docker Compose** for easy setup of PostgreSQL and Redis services
 
 ## Features
@@ -14,6 +15,8 @@
 - High-performance HTTP handling with Fiber v2  
 - Robust database integration using GORM with PostgreSQL  
 - Caching support via Redis
+- REST and gRPC APIs supported 
+- Data Transfer Objects (DTO) to manage data structure transformations between layers  
 - Swagger API documentation with automatic generation 
 - Ready-to-use Docker Compose setup for dependencies  
 
@@ -54,6 +57,12 @@ Follow the steps below to set up and run the project:
     go run ./cmd/app
     ```
 
+6. Test:
+
+    ```bash
+    go test ./pkg/routes
+    ```
+
 Swagger UI for the API documentation is available at: localhost:8080/api/v1/docs
 
 <img width="0" alt="image" src="https://github.com/user-attachments/assets/e38ff0e8-8fd1-4d39-baca-af30b85b353a" />
@@ -86,6 +95,8 @@ Swagger UI for the API documentation is available at: localhost:8080/api/v1/docs
 │   ├── redisclient/
 │   ├── responses/
 │   └── routes/
+├── proto/
+│   └── order/
 ├── utils/                
 ├── .env.example             
 ├── .gitignore               
