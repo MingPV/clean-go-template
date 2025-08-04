@@ -1,4 +1,4 @@
-# go-clean-template
+# clean-go-template
 <div><img width="600" alt="image" src="https://github.com/user-attachments/assets/5ff920c7-eccf-4fa2-8198-3cf2ec2dae6e" /></div>
 
 **go-clean-template** is a clean and scalable starter template for building backend applications in Go, following Clean Architecture principles. This template uses:
