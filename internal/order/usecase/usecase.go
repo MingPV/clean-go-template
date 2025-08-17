@@ -51,7 +51,6 @@ func (s *OrderService) FindOrderByID(id int) (*entities.Order, error) {
 	if err == nil {
 		var order entities.Order
 		json.Unmarshal([]byte(jsonData), &order)
-		// fmt.Println("Cache hit, returning from cache")
 		return &order, nil
 	}
 
@@ -61,7 +60,6 @@ func (s *OrderService) FindOrderByID(id int) (*entities.Order, error) {
 	}
 
 	// If not found in the cache, save it to the cache
-	// fmt.Println("Cache miss saving to cache")
 	bytes, _ := json.Marshal(order)
 	redisclient.Set("order:"+strconv.Itoa(id), string(bytes), time.Minute*10)
 
@@ -82,6 +80,8 @@ func (s *OrderService) PatchOrder(id int, order *entities.Order) (*entities.Orde
 	if err == nil {
 		bytes, _ := json.Marshal(updatedOrder)
 		redisclient.Set("order:"+strconv.Itoa(id), string(bytes), time.Minute*10)
+	} else {
+		return nil, err
 	}
 
 	return updatedOrder, nil
