@@ -4,6 +4,7 @@ import (
 	"errors"
 
 	"github.com/gofiber/fiber/v2"
+	"google.golang.org/grpc/codes"
 	"gorm.io/gorm/logger"
 )
 
@@ -113,5 +114,51 @@ func StatusCode(err error) int {
 	// Default
 	default:
 		return fiber.StatusInternalServerError
+	}
+}
+
+// GRPCCode maps errors to gRPC status codes
+func GRPCCode(err error) codes.Code {
+	switch {
+	// Generic
+	case errors.Is(err, ErrInternalServer), errors.Is(err, ErrUnknown), errors.Is(err, ErrTransactionAbort):
+		return codes.Internal
+	case errors.Is(err, ErrTimeout):
+		return codes.DeadlineExceeded
+	case errors.Is(err, ErrUnauthorized):
+		return codes.Unauthenticated
+	case errors.Is(err, ErrForbidden), errors.Is(err, ErrOperationDenied):
+		return codes.PermissionDenied
+	case errors.Is(err, ErrNotImplemented):
+		return codes.Unimplemented
+
+	// Database / GORM errors
+	case errors.Is(err, ErrRecordNotFound):
+		return codes.NotFound
+	case errors.Is(err, ErrDuplicatedKey), errors.Is(err, ErrConflict), errors.Is(err, ErrAlreadyExists), errors.Is(err, ErrNotAvailable):
+		return codes.AlreadyExists
+	case errors.Is(err, ErrDependencyFail):
+		return codes.FailedPrecondition
+	case errors.Is(err, ErrInvalidTransaction), errors.Is(err, ErrMissingWhereClause),
+		errors.Is(err, ErrUnsupportedRelation), errors.Is(err, ErrPrimaryKeyRequired),
+		errors.Is(err, ErrModelValueRequired), errors.Is(err, ErrModelAccessibleFieldsRequired),
+		errors.Is(err, ErrSubQueryRequired), errors.Is(err, ErrUnsupportData),
+		errors.Is(err, ErrUnsupportedDriver), errors.Is(err, ErrEmptySlice),
+		errors.Is(err, ErrDryRunModeUnsupported), errors.Is(err, ErrPreloadNotAllowed),
+		errors.Is(err, ErrForeignKeyViolated), errors.Is(err, ErrCheckConstraintViolated),
+		errors.Is(err, ErrInvalidData), errors.Is(err, ErrInvalidID), errors.Is(err, ErrRequiredField),
+		errors.Is(err, ErrInvalidFormat), errors.Is(err, ErrOutOfRange), errors.Is(err, ErrInvalidValue),
+		errors.Is(err, ErrInvalidValueOfLength), errors.Is(err, ErrInvalidField):
+		return codes.InvalidArgument
+
+	// Validation / business logic
+	case errors.Is(err, ErrUnprocessable):
+		return codes.FailedPrecondition
+	case errors.Is(err, ErrLimitExceeded):
+		return codes.ResourceExhausted
+
+	// Default
+	default:
+		return codes.Unknown
 	}
 }
