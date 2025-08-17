@@ -1,8 +1,6 @@
 package repository
 
 import (
-	"errors"
-
 	"github.com/MingPV/clean-go-template/internal/entities"
 	"gorm.io/gorm"
 )
@@ -46,7 +44,7 @@ func (r *GormOrderRepository) Patch(id int, order *entities.Order) error {
 		return result.Error
 	}
 	if result.RowsAffected == 0 {
-		return errors.New("order not found")
+		return gorm.ErrRecordNotFound
 	}
 	return nil
 }
@@ -57,7 +55,7 @@ func (r *GormOrderRepository) Delete(id int) error {
 		return result.Error
 	}
 	if result.RowsAffected == 0 {
-		return errors.New("order not found")
+		return gorm.ErrRecordNotFound
 	}
 	return nil
 }
