@@ -5,7 +5,8 @@ import (
 
 	"github.com/MingPV/clean-go-template/internal/user/dto"
 	"github.com/MingPV/clean-go-template/internal/user/usecase"
-	response "github.com/MingPV/clean-go-template/pkg/responses"
+	appError "github.com/MingPV/clean-go-template/pkg/errors"
+	"github.com/MingPV/clean-go-template/pkg/responses"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -28,12 +29,12 @@ func NewHttpUserHandler(useCase usecase.UserUseCase) *HttpUserHandler {
 func (h *HttpUserHandler) Register(c *fiber.Ctx) error {
 	req := new(dto.RegisterRequest)
 	if err := c.BodyParser(req); err != nil {
-		return response.Error(c, fiber.StatusBadRequest, "invalid request")
+		return responses.Error(c, appError.ErrInvalidData)
 	}
 
 	userEntity := dto.ToUserEntity(req)
 	if err := h.userUseCase.Register(userEntity); err != nil {
-		return response.Error(c, fiber.StatusBadRequest, err.Error())
+		return responses.Error(c, err)
 	}
 
 	return c.Status(fiber.StatusCreated).JSON(dto.ToUserResponse(userEntity))
@@ -50,12 +51,12 @@ func (h *HttpUserHandler) Register(c *fiber.Ctx) error {
 func (h *HttpUserHandler) Login(c *fiber.Ctx) error {
 	loginReq := new(dto.LoginRequest)
 	if err := c.BodyParser(loginReq); err != nil {
-		return response.Error(c, fiber.StatusBadRequest, "invalid request")
+		return responses.Error(c, appError.ErrInvalidData)
 	}
 
 	token, userEntity, err := h.userUseCase.Login(loginReq.Email, loginReq.Password)
 	if err != nil {
-		return response.Error(c, fiber.StatusUnauthorized, "invalid email or password")
+		return responses.ErrorWithMessage(c, appError.ErrUnauthorized, "invalid email or password")
 	}
 
 	return c.JSON(fiber.Map{
@@ -73,14 +74,12 @@ func (h *HttpUserHandler) Login(c *fiber.Ctx) error {
 func (h *HttpUserHandler) GetUser(c *fiber.Ctx) error {
 	userID := c.Locals("user_id")
 	if userID == nil {
-		return response.Error(c, fiber.StatusUnauthorized, "invalid user id")
+		return responses.Error(c, appError.ErrInvalidData)
 	}
-
-	fmt.Println(fmt.Sprint(userID))
 
 	userEntity, err := h.userUseCase.FindUserByID(fmt.Sprint(userID))
 	if err != nil {
-		return response.Error(c, fiber.StatusNotFound, "user not found")
+		return responses.Error(c, err)
 	}
 
 	return c.JSON(dto.ToUserResponse(userEntity))
@@ -96,12 +95,12 @@ func (h *HttpUserHandler) GetUser(c *fiber.Ctx) error {
 func (h *HttpUserHandler) FindUserByID(c *fiber.Ctx) error {
 	id := c.Params("id")
 	if id == "" {
-		return response.Error(c, fiber.StatusBadRequest, "id is required")
+		return responses.ErrorWithMessage(c, appError.ErrInvalidData, "id is required")
 	}
 
 	userEntity, err := h.userUseCase.FindUserByID(id)
 	if err != nil {
-		return response.Error(c, fiber.StatusNotFound, "user not found")
+		return responses.Error(c, err)
 	}
 
 	return c.JSON(dto.ToUserResponse(userEntity))
@@ -116,7 +115,7 @@ func (h *HttpUserHandler) FindUserByID(c *fiber.Ctx) error {
 func (h *HttpUserHandler) FindAllUsers(c *fiber.Ctx) error {
 	users, err := h.userUseCase.FindAllUsers()
 	if err != nil {
-		return response.Error(c, fiber.StatusInternalServerError, "internal server error")
+		return responses.Error(c, err)
 	}
 
 	return c.JSON(dto.ToUserResponseList(users))

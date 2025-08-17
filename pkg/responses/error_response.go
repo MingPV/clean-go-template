@@ -1,12 +1,19 @@
-package response
+package responses
 
-import "github.com/gofiber/fiber/v2"
+import (
+	appError "github.com/MingPV/clean-go-template/pkg/errors"
+	"github.com/gofiber/fiber/v2"
+)
 
 // ErrorResponse represents the standard error response
 type ErrorResponse struct {
 	Error string `json:"error" example:"example error"`
 }
 
-func Error(c *fiber.Ctx, status int, message string) error {
-	return c.Status(status).JSON(ErrorResponse{Error: message})
+func Error(c *fiber.Ctx, err error) error {
+	return c.Status(appError.StatusCode(err)).JSON(ErrorResponse{Error: err.Error()})
+}
+
+func ErrorWithMessage(c *fiber.Ctx, err error, message string) error {
+	return c.Status(appError.StatusCode(err)).JSON(ErrorResponse{Error: message})
 }

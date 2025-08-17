@@ -1,24 +1,15 @@
 package usecase
 
 import (
-	"errors"
-	"fmt"
 	"os"
 	"time"
 
 	"github.com/MingPV/clean-go-template/internal/entities"
 	"github.com/MingPV/clean-go-template/internal/user/repository"
+	appError "github.com/MingPV/clean-go-template/pkg/errors"
 	"github.com/golang-jwt/jwt/v5"
 	"golang.org/x/crypto/bcrypt"
 )
-
-// What UserService can do
-// type UserUseCase interface {
-// 	Register(user *entities.User) error
-// 	Login(email, password string) (string, *entities.User, error)
-// 	FindUserByID(id uint) (*entities.User, error)
-// 	FindAllUsers() ([]entities.User, error)
-// }
 
 // UserService struct
 type UserService struct {
@@ -34,7 +25,7 @@ func NewUserService(repo repository.UserRepository) UserUseCase {
 func (s *UserService) Register(user *entities.User) error {
 	existingUser, _ := s.repo.FindByEmail(user.Email)
 	if existingUser != nil {
-		return errors.New("email already exists")
+		return appError.ErrAlreadyExists
 	}
 
 	hashedPwd, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
@@ -51,12 +42,11 @@ func (s *UserService) Register(user *entities.User) error {
 func (s *UserService) Login(email string, password string) (string, *entities.User, error) {
 	user, err := s.repo.FindByEmail(email)
 	if err != nil || user == nil {
-		return "", nil, errors.New("email not found")
+		return "", nil, err
 	}
 
 	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password)); err != nil {
-		fmt.Println(err)
-		return "", nil, errors.New("invalid email or password")
+		return "", nil, err
 	}
 
 	// Generate JWT token
