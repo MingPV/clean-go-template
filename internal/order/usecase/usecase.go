@@ -69,12 +69,12 @@ func (s *OrderService) FindOrderByID(id int) (*entities.Order, error) {
 }
 
 // OrderService Methods - 4 patch
-func (s *OrderService) PatchOrder(id int, order *entities.Order) error {
+func (s *OrderService) PatchOrder(id int, order *entities.Order) (*entities.Order, error) {
 	if order.Total <= 0 {
-		return errors.New("total must be positive")
+		return nil, errors.New("total must be positive")
 	}
 	if err := s.repo.Patch(id, order); err != nil {
-		return err
+		return nil, err
 	}
 
 	// Update cache after patching
@@ -84,7 +84,7 @@ func (s *OrderService) PatchOrder(id int, order *entities.Order) error {
 		redisclient.Set("order:"+strconv.Itoa(id), string(bytes), time.Minute*10)
 	}
 
-	return nil
+	return updatedOrder, nil
 }
 
 // OrderService Methods - 5 delete

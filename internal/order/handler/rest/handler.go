@@ -99,11 +99,8 @@ func (h *HttpOrderHandler) PatchOrder(c *fiber.Ctx) error {
 	}
 
 	order := &entities.Order{Total: req.Total}
-	if err := h.orderUseCase.PatchOrder(orderID, order); err != nil {
-		return responses.Error(c, fiber.StatusInternalServerError, err.Error())
-	}
 
-	updatedOrder, err := h.orderUseCase.FindOrderByID(orderID)
+	updatedOrder, err := h.orderUseCase.PatchOrder(orderID, order)
 	if err != nil {
 		return responses.Error(c, fiber.StatusInternalServerError, err.Error())
 	}

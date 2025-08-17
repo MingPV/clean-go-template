@@ -51,10 +51,7 @@ func (h *GrpcOrderHandler) FindAllOrders(ctx context.Context, req *orderpb.FindA
 
 func (h *GrpcOrderHandler) PatchOrder(ctx context.Context, req *orderpb.PatchOrderRequest) (*orderpb.PatchOrderResponse, error) {
 	order := &entities.Order{Total: float64(req.Total)}
-	if err := h.orderUseCase.PatchOrder(int(req.Id), order); err != nil {
-		return nil, status.Errorf(codes.Internal, "%s", err.Error())
-	}
-	updatedOrder, err := h.orderUseCase.FindOrderByID(int(req.Id))
+	updatedOrder, err := h.orderUseCase.PatchOrder(int(req.Id), order)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "%s", err.Error())
 	}
