@@ -21,7 +21,7 @@ func NewUserService(repo repository.UserRepository) UserUseCase {
 	return &UserService{repo: repo}
 }
 
-// Register user (hash password)
+// UserService Methods - 1 Register user (hash password)
 func (s *UserService) Register(user *entities.User) error {
 	existingUser, _ := s.repo.FindByEmail(user.Email)
 	if existingUser != nil {
@@ -38,7 +38,7 @@ func (s *UserService) Register(user *entities.User) error {
 	return s.repo.Save(user)
 }
 
-// Login user (check email + password)
+// UserService Methods - 2 Login user (check email + password)
 func (s *UserService) Login(email string, password string) (string, *entities.User, error) {
 	user, err := s.repo.FindByEmail(email)
 	if err != nil || user == nil {
@@ -65,12 +65,12 @@ func (s *UserService) Login(email string, password string) (string, *entities.Us
 	return tokenString, user, nil
 }
 
-// Get user by ID
+// UserService Methods - 3 Get user by id
 func (s *UserService) FindUserByID(id string) (*entities.User, error) {
 	return s.repo.FindByID(id)
 }
 
-// Get all users
+// UserService Methods - 4 Get all users
 func (s *UserService) FindAllUsers() ([]*entities.User, error) {
 	users, err := s.repo.FindAll()
 	if err != nil {
@@ -79,11 +79,29 @@ func (s *UserService) FindAllUsers() ([]*entities.User, error) {
 	return users, nil
 }
 
-// Get user by Email
+// UserService Methods - 5 Get user by email
 func (s *UserService) GetUserByEmail(email string) (*entities.User, error) {
 	user, err := s.repo.FindByEmail(email)
 	if err != nil {
 		return nil, err
 	}
 	return user, nil
+}
+
+// UserService Methods - 6 Patch
+func (s *UserService) PatchUser(id string, user *entities.User) (*entities.User, error) {
+	if err := s.repo.Patch(id, user); err != nil {
+		return nil, err
+	}
+	updatedUser, _ := s.repo.FindByID(id)
+
+	return updatedUser, nil
+}
+
+// UserService Methods - 7 Delete
+func (s *UserService) DeleteUser(id string) error {
+	if err := s.repo.Delete(id); err != nil {
+		return err
+	}
+	return nil
 }

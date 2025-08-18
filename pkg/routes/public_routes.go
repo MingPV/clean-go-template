@@ -42,12 +42,14 @@ func RegisterPublicRoutes(app fiber.Router, db *gorm.DB) {
 	userGroup := api.Group("/users")
 	userGroup.Get("/", userHandler.FindAllUsers)
 	userGroup.Get("/:id", userHandler.FindUserByID)
+	userGroup.Patch("/:id", userHandler.PatchUser)
+	userGroup.Delete("/:id", userHandler.DeleteUser)
 
 	// Order routes
 	orderGroup := api.Group("/orders")
 	orderGroup.Get("/", orderHandler.FindAllOrders)
 	orderGroup.Get("/:id", orderHandler.FindOrderByID)
 	orderGroup.Post("/", orderHandler.CreateOrder)
-	orderGroup.Delete("/:id", orderHandler.DeleteOrder)
 	orderGroup.Patch("/:id", orderHandler.PatchOrder)
+	orderGroup.Delete("/:id", orderHandler.DeleteOrder)
 }

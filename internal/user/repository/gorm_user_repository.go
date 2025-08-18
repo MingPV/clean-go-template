@@ -49,3 +49,25 @@ func (r *GormUserRepository) FindAll() ([]*entities.User, error) {
 	}
 	return users, nil
 }
+
+func (r *GormUserRepository) Patch(id string, user *entities.User) error {
+	result := r.db.Model(&entities.User{}).Where("id = ?", id).Updates(user)
+	if result.Error != nil {
+		return result.Error
+	}
+	if result.RowsAffected == 0 {
+		return gorm.ErrRecordNotFound
+	}
+	return nil
+}
+
+func (r *GormUserRepository) Delete(id string) error {
+	result := r.db.Delete(&entities.User{}, "id = ?", id)
+	if result.Error != nil {
+		return result.Error
+	}
+	if result.RowsAffected == 0 {
+		return gorm.ErrRecordNotFound
+	}
+	return nil
+}
