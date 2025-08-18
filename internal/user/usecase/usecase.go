@@ -6,7 +6,7 @@ import (
 
 	"github.com/MingPV/clean-go-template/internal/entities"
 	"github.com/MingPV/clean-go-template/internal/user/repository"
-	appError "github.com/MingPV/clean-go-template/pkg/errors"
+	"github.com/MingPV/clean-go-template/pkg/apperror"
 	"github.com/golang-jwt/jwt/v5"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -25,7 +25,7 @@ func NewUserService(repo repository.UserRepository) UserUseCase {
 func (s *UserService) Register(user *entities.User) error {
 	existingUser, _ := s.repo.FindByEmail(user.Email)
 	if existingUser != nil {
-		return appError.ErrAlreadyExists
+		return apperror.ErrAlreadyExists
 	}
 
 	hashedPwd, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)

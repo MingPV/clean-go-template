@@ -3,7 +3,7 @@ package rest
 import (
 	"strconv"
 
-	appError "github.com/MingPV/clean-go-template/pkg/errors"
+	"github.com/MingPV/clean-go-template/pkg/apperror"
 
 	"github.com/MingPV/clean-go-template/internal/entities"
 	"github.com/MingPV/clean-go-template/internal/order/dto"
@@ -139,7 +139,7 @@ func (h *HttpOrderHandler) DeleteOrder(c *fiber.Ctx) error {
 func validatePatchOrder(order *entities.Order) (string, error) {
 
 	if order.Total <= 0 {
-		return "total must be positive", appError.ErrInvalidData
+		return "total must be positive", apperror.ErrInvalidData
 	}
 
 	return "", nil

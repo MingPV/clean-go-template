@@ -5,7 +5,7 @@ import (
 
 	"github.com/MingPV/clean-go-template/internal/user/dto"
 	"github.com/MingPV/clean-go-template/internal/user/usecase"
-	appError "github.com/MingPV/clean-go-template/pkg/errors"
+	"github.com/MingPV/clean-go-template/pkg/apperror"
 	"github.com/MingPV/clean-go-template/pkg/responses"
 	"github.com/gofiber/fiber/v2"
 )
@@ -29,7 +29,7 @@ func NewHttpUserHandler(useCase usecase.UserUseCase) *HttpUserHandler {
 func (h *HttpUserHandler) Register(c *fiber.Ctx) error {
 	req := new(dto.RegisterRequest)
 	if err := c.BodyParser(req); err != nil {
-		return responses.Error(c, appError.ErrInvalidData)
+		return responses.Error(c, apperror.ErrInvalidData)
 	}
 
 	userEntity := dto.ToUserEntity(req)
@@ -51,12 +51,12 @@ func (h *HttpUserHandler) Register(c *fiber.Ctx) error {
 func (h *HttpUserHandler) Login(c *fiber.Ctx) error {
 	loginReq := new(dto.LoginRequest)
 	if err := c.BodyParser(loginReq); err != nil {
-		return responses.Error(c, appError.ErrInvalidData)
+		return responses.Error(c, apperror.ErrInvalidData)
 	}
 
 	token, userEntity, err := h.userUseCase.Login(loginReq.Email, loginReq.Password)
 	if err != nil {
-		return responses.ErrorWithMessage(c, appError.ErrUnauthorized, "invalid email or password")
+		return responses.ErrorWithMessage(c, apperror.ErrUnauthorized, "invalid email or password")
 	}
 
 	return c.JSON(fiber.Map{
@@ -74,7 +74,7 @@ func (h *HttpUserHandler) Login(c *fiber.Ctx) error {
 func (h *HttpUserHandler) GetUser(c *fiber.Ctx) error {
 	userID := c.Locals("user_id")
 	if userID == nil {
-		return responses.Error(c, appError.ErrInvalidData)
+		return responses.Error(c, apperror.ErrInvalidData)
 	}
 
 	userEntity, err := h.userUseCase.FindUserByID(fmt.Sprint(userID))
@@ -95,7 +95,7 @@ func (h *HttpUserHandler) GetUser(c *fiber.Ctx) error {
 func (h *HttpUserHandler) FindUserByID(c *fiber.Ctx) error {
 	id := c.Params("id")
 	if id == "" {
-		return responses.ErrorWithMessage(c, appError.ErrInvalidData, "id is required")
+		return responses.ErrorWithMessage(c, apperror.ErrInvalidData, "id is required")
 	}
 
 	userEntity, err := h.userUseCase.FindUserByID(id)
