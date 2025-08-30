@@ -1,3 +1,6 @@
+# Run: docker-compose --env-file .env.dev up -d
+# Choose your env
+
 services:
   postgres:
     image: postgres:latest
