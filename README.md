@@ -22,6 +22,18 @@
 
 Follow the steps below to set up and run the project:
 
+### Rename the Project (Optional but Recommended)
+
+If you want to rename this project to your own project name, use the automated script:
+
+```bash
+./rename-project.sh
+```
+
+The script will guide you through renaming the project. For more details, see [docs/RENAME_PROJECT.md](docs/RENAME_PROJECT.md).
+
+---
+
 1. Clone the repository:
 
     ```bash
