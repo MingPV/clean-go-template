@@ -4,14 +4,13 @@ import (
 	"log"
 
 	"github.com/MingPV/clean-go-template/pkg/database"
-	"github.com/MingPV/clean-go-template/pkg/redisclient"
 	"github.com/MingPV/clean-go-template/utils"
 )
 
 func Start() {
 
-	// Setup dependencies: database, Redis, and configuration
-	db, _, cfg, err := SetupDependencies("dev")
+	// Setup dependencies: database and configuration
+	db, cfg, err := SetupDependencies("dev")
 	if err != nil {
 		log.Fatalf("❌ Failed to setup dependencies: %v", err)
 	}
@@ -43,11 +42,6 @@ func Start() {
 		func() {
 			log.Println("Shutting down gRPC server...")
 			grpcServer.GracefulStop()
-		},
-		func() {
-			if err := redisclient.CloseRedisClient(); err != nil {
-				log.Printf("Error closing Redis: %v", err)
-			}
 		},
 		func() {
 			if err := database.Close(); err != nil {

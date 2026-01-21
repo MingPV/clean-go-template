@@ -1,10 +1,7 @@
 package app
 
 import (
-	"log"
-
 	"github.com/gofiber/fiber/v2"
-	"github.com/redis/go-redis/v9"
 	"google.golang.org/grpc"
 	"gorm.io/gorm"
 
@@ -15,7 +12,6 @@ import (
 	"github.com/MingPV/clean-go-template/pkg/config"
 	"github.com/MingPV/clean-go-template/pkg/database"
 	"github.com/MingPV/clean-go-template/pkg/middleware"
-	"github.com/MingPV/clean-go-template/pkg/redisclient"
 	"github.com/MingPV/clean-go-template/pkg/routes"
 	orderpb "github.com/MingPV/clean-go-template/proto/order"
 )
@@ -44,24 +40,20 @@ func SetupGrpcServer(db *gorm.DB, cfg *config.Config) (*grpc.Server, error) {
 }
 
 // dependencies
-func SetupDependencies(env string) (*gorm.DB, *redis.Client, *config.Config, error) {
+func SetupDependencies(env string) (*gorm.DB, *config.Config, error) {
 	cfg := config.LoadConfig(env)
 
 	db, err := database.Connect(cfg.DatabaseDSN)
 	if err != nil {
-		return nil, nil, nil, err
+		return nil, nil, err
 	}
 
 	if env == "test" {
-		db.Migrator().DropTable(&entities.Order{}, &entities.User{})
+		_ = db.Migrator().DropTable(&entities.Order{}, &entities.User{})
 	}
 	if err := db.AutoMigrate(&entities.Order{}, &entities.User{}); err != nil {
-		return nil, nil, nil, err
+		return nil, nil, err
 	}
 
-	if err := redisclient.InitRedisClient(cfg.RedisAddress); err != nil {
-		log.Printf("redis not available: %v", err)
-	}
-
-	return db, redisclient.GetClient(), cfg, nil
+	return db, cfg, nil
 }

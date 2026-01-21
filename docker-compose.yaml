@@ -1,5 +1,4 @@
-# Run: docker-compose --env-file .env.dev up -d
-# Choose your env
+# Run with .env.dev: docker-compose --env-file .env.dev up -d
 
 services:
   postgres:
@@ -15,12 +14,19 @@ services:
       - "${DB_PORT}:5432"
     restart: unless-stopped
 
-  redis:
-    image: redis:7-alpine
-    container_name: redis
+  postgres-test:
+    image: postgres:latest
+    container_name: postgres-test
+    environment:
+      POSTGRES_DB: ${DB_TEST_NAME}
+      POSTGRES_USER: ${DB_TEST_USER}
+      POSTGRES_PASSWORD: ${DB_TEST_PASSWORD}
+    volumes:
+      - postgres_test_data:/var/lib/postgresql/data
     ports:
-      - "6379:6379"
+      - "${DB_TEST_PORT}:5432"
     restart: unless-stopped
 
 volumes:
   postgres_data:
+  postgres_test_data:

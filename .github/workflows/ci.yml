@@ -1,0 +1,130 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, develop, master ]
+  pull_request:
+    branches: [ main, develop, master ]
+
+jobs:
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+    
+    services:
+      postgres:
+        image: postgres:latest
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.24'
+
+      - name: Cache Go modules
+        uses: actions/cache@v4
+        with:
+          path: ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
+
+      - name: Verify go.sum
+        run: |
+          if [ ! -f go.sum ]; then
+            echo "go.sum not found, running go mod tidy..."
+            go mod tidy
+          fi
+
+      - name: Download dependencies
+        run: go mod download
+
+      - name: Run tests
+        env:
+          # Test database configuration (consistent with local development)
+          DB_HOST: localhost
+          DB_TEST_PORT: 5432
+          DB_TEST_USER: postgres
+          DB_TEST_PASSWORD: postgres
+          DB_TEST_NAME: test
+          # Application configuration
+          JWT_SECRET: test-secret-key-for-jwt-token-generation
+          JWT_EXPIRATION: 3600
+          APP_PORT: 8000
+          GRPC_PORT: 50052
+          APP_ENV: test
+        run: go test -v -race -coverprofile=coverage.out ./...
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          file: ./coverage.out
+          flags: unittests
+          name: codecov-umbrella
+          fail_ci_if_error: false
+
+  lint:
+    name: Lint Code
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.24'
+
+      - name: Verify go.sum and download dependencies
+        run: |
+          if [ ! -f go.sum ]; then
+            echo "go.sum not found, running go mod tidy..."
+            go mod tidy
+          fi
+          go mod download
+
+      - name: Run golangci-lint
+        uses: golangci/golangci-lint-action@v6
+        with:
+          version: latest
+          args: --timeout=5m
+
+  build:
+    name: Build Application
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.24'
+
+      - name: Verify go.sum and download dependencies
+        run: |
+          if [ ! -f go.sum ]; then
+            echo "go.sum not found, running go mod tidy..."
+            go mod tidy
+          fi
+          go mod download
+
+      - name: Build
+        run: go build -v ./...
+
