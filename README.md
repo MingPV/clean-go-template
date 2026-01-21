@@ -5,16 +5,14 @@
 
 - **Fiber v2** as a fast and lightweight web framework for building RESTful APIs 
 - **GORM** as the ORM for PostgreSQL database access
-- **Redis** for caching to improve performance and reduce database load
 - **gRPC** for high-performance RPC communication 
-- **Docker Compose** for easy setup of PostgreSQL and Redis services
+- **Docker Compose** for easy setup of PostgreSQL services
 
 ## Features
 
 - Clear separation of concerns with Clean Architecture  
 - High-performance HTTP handling with Fiber v2  
 - Robust database integration using GORM with PostgreSQL  
-- Caching support via Redis
 - REST and gRPC APIs supported 
 - Data Transfer Objects (DTO) to manage data structure transformations between layers  
 - Swagger API documentation with automatic generation 
@@ -43,9 +41,9 @@ Follow the steps below to set up and run the project:
     cp .env.example .env
     ```
 
-    Open the `.env` file and fill in all required configuration values such as PostgreSQL credentials, Redis connection details, and any other environment-specific settings.
+    Open the `.env` file and fill in all required configuration values such as PostgreSQL credentials and any other environment-specific settings.
 
-4. Start PostgreSQL and Redis services using Docker Compose:
+4. Start PostgreSQL service using Docker Compose:
 
     ```bash
     docker-compose up -d
@@ -94,7 +92,6 @@ Swagger UI for the API documentation is available at: localhost:8080/api/v1/docs
 │   ├── config/
 │   ├── database/
 │   ├── middleware/
-│   ├── redisclient/
 │   ├── responses/
 │   └── routes/
 ├── proto/

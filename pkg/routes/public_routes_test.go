@@ -20,7 +20,7 @@ func setupTestApp(t *testing.T) *fiber.App {
 		t.Fatalf("Failed to load .env.test: %v", err)
 	}
 
-	db, _, cfg, err := app.SetupDependencies("test")
+	db, cfg, err := app.SetupDependencies("test")
 	if err != nil {
 		t.Fatalf("failed to setup dependencies: %v", err)
 	}

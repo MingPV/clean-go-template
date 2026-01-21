@@ -22,12 +22,6 @@ type Config struct {
 
 	JWTSecret     string
 	JWTExpiration int // in seconds
-
-	PgAdminEmail    string
-	PgAdminPassword string
-	PgAdminPort     string
-
-	RedisAddress string
 }
 
 func LoadConfig(env string) *Config {
@@ -44,20 +38,16 @@ func LoadConfig(env string) *Config {
 	jwtExp := getEnvAsInt("JWT_EXPIRATION", 3600)
 
 	cfg := &Config{
-		AppPort:         getEnv("APP_PORT", "8000"),
-		GrpcPort:        getEnv("GRPC_PORT", "50051"),
-		AppEnv:          getEnv("APP_ENV", "development"),
-		DBHost:          getEnv("DB_HOST", "localhost"),
-		DBPort:          getEnv("DB_PORT", "5432"),
-		DBUser:          getEnv("DB_USER", "postgres"),
-		DBPassword:      getEnv("DB_PASSWORD", ""),
-		DBName:          getEnv("DB_NAME", "test"),
-		JWTSecret:       getEnv("JWT_SECRET", "changeme"),
-		JWTExpiration:   jwtExp,
-		PgAdminEmail:    getEnv("PGADMIN_DEFAULT_EMAIL", ""),
-		PgAdminPassword: getEnv("PGADMIN_DEFAULT_PASSWORD", ""),
-		PgAdminPort:     getEnv("PGADMIN_PORT", "5050"),
-		RedisAddress:    getEnv("REDIS_ADDR", "redis:6379"),
+		AppPort:       getEnv("APP_PORT", "8000"),
+		GrpcPort:      getEnv("GRPC_PORT", "50051"),
+		AppEnv:        getEnv("APP_ENV", "development"),
+		DBHost:        getEnv("DB_HOST", "localhost"),
+		DBPort:        getEnv("DB_PORT", "5432"),
+		DBUser:        getEnv("DB_USER", "postgres"),
+		DBPassword:    getEnv("DB_PASSWORD", ""),
+		DBName:        getEnv("DB_NAME", "test"),
+		JWTSecret:     getEnv("JWT_SECRET", "changeme"),
+		JWTExpiration: jwtExp,
 	}
 
 	cfg.DatabaseDSN = fmt.Sprintf(
