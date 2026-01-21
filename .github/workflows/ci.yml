@@ -43,6 +43,13 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-go-
 
+      - name: Verify go.sum
+        run: |
+          if [ ! -f go.sum ]; then
+            echo "go.sum not found, running go mod tidy..."
+            go mod tidy
+          fi
+
       - name: Download dependencies
         run: go mod download
 
@@ -83,6 +90,14 @@ jobs:
         with:
           go-version: '1.24'
 
+      - name: Verify go.sum and download dependencies
+        run: |
+          if [ ! -f go.sum ]; then
+            echo "go.sum not found, running go mod tidy..."
+            go mod tidy
+          fi
+          go mod download
+
       - name: Run golangci-lint
         uses: golangci/golangci-lint-action@v6
         with:
@@ -101,6 +116,14 @@ jobs:
         uses: actions/setup-go@v5
         with:
           go-version: '1.24'
+
+      - name: Verify go.sum and download dependencies
+        run: |
+          if [ ! -f go.sum ]; then
+            echo "go.sum not found, running go mod tidy..."
+            go mod tidy
+          fi
+          go mod download
 
       - name: Build
         run: go build -v ./...
