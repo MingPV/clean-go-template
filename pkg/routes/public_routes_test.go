@@ -3,132 +3,193 @@ package routes_test
 import (
 	"bytes"
 	"encoding/json"
-
 	"net/http/httptest"
 	"testing"
 
 	"github.com/gofiber/fiber/v2"
-	"github.com/joho/godotenv"
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/suite"
+	"gorm.io/gorm"
 
 	"github.com/MingPV/clean-go-template/internal/app"
+	"github.com/MingPV/clean-go-template/pkg/config"
+	"github.com/MingPV/clean-go-template/pkg/database"
 )
 
-func setupTestApp(t *testing.T) *fiber.App {
-	err := godotenv.Load("../../.env.test")
-	if err != nil {
-		t.Fatalf("Failed to load .env.test: %v", err)
-	}
-
-	db, cfg, err := app.SetupDependencies("test")
-	if err != nil {
-		t.Fatalf("failed to setup dependencies: %v", err)
-	}
-
-	restApp, err := app.SetupRestServer(db, cfg)
-	if err != nil {
-		t.Fatalf("failed to setup REST server: %v", err)
-	}
-
-	return restApp
+type PublicRoutesTestSuite struct {
+	suite.Suite
+	db      *gorm.DB
+	app     *fiber.App
+	cfg     *config.Config
+	cleanup func()
 }
 
-func TestPublicRoutes(t *testing.T) {
-	app := setupTestApp(t)
+func (s *PublicRoutesTestSuite) SetupTest() {
+	// Setup test database with cleanup
+	s.db, s.cleanup = database.SetupTestDB(s.T())
 
-	// === USERS ===
-	t.Run("GET /api/v1/users", func(t *testing.T) {
-		req := httptest.NewRequest("GET", "/api/v1/users", nil)
-		resp, err := app.Test(req, -1)
-		assert.NoError(t, err)
-		assert.Equal(t, fiber.StatusOK, resp.StatusCode)
-	})
+	// Load config for dev environment
+	s.cfg = config.LoadConfig("dev")
 
-	t.Run("GET /api/v1/users/:id (not found)", func(t *testing.T) {
-		req := httptest.NewRequest("GET", "/api/v1/users/9a176ca5-f3e0-4994-869c-fac0e8c9d5dc", nil)
-		resp, err := app.Test(req, -1)
-		assert.NoError(t, err)
-		assert.NotEqual(t, fiber.StatusInternalServerError, resp.StatusCode)
-	})
+	// Setup REST server with test database (For registering routes and middleware)
+	var err error
+	s.app, err = app.SetupRestServer(s.db, s.cfg)
+	s.NoError(err, "Failed to setup REST server")
+}
 
-	// === AUTH ===
-	t.Run("POST /api/v1/auth/signup", func(t *testing.T) {
-		body := map[string]string{
-			"email":    "testuser@example.com",
-			"password": "securepassword123",
-		}
-		jsonBody, _ := json.Marshal(body)
+func (s *PublicRoutesTestSuite) TearDownTest() {
+	// Clean up database after each test
+	if s.cleanup != nil {
+		s.cleanup()
+	}
+}
 
-		req := httptest.NewRequest("POST", "/api/v1/auth/signup", bytes.NewBuffer(jsonBody))
-		req.Header.Set("Content-Type", "application/json")
+func TestPublicRoutesTestSuite(t *testing.T) {
+	suite.Run(t, new(PublicRoutesTestSuite))
+}
 
-		resp, err := app.Test(req, -1)
-		assert.NoError(t, err)
-		assert.True(t, resp.StatusCode == fiber.StatusOK || resp.StatusCode == fiber.StatusCreated)
-	})
+// === USER ROUTES ===
 
-	t.Run("POST /api/v1/auth/signin", func(t *testing.T) {
-		body := map[string]string{
-			"email":    "testuser@example.com",
-			"password": "securepassword123",
-		}
-		jsonBody, _ := json.Marshal(body)
+func (s *PublicRoutesTestSuite) TestGetUsers() {
+	req := httptest.NewRequest("GET", "/api/v1/users", nil)
+	resp, err := s.app.Test(req, -1)
+	s.NoError(err)
+	s.Equal(fiber.StatusOK, resp.StatusCode)
+}
 
-		req := httptest.NewRequest("POST", "/api/v1/auth/signin", bytes.NewBuffer(jsonBody))
-		req.Header.Set("Content-Type", "application/json")
+func (s *PublicRoutesTestSuite) TestGetUserByID_NotFound() {
+	req := httptest.NewRequest("GET", "/api/v1/users/9a176ca5-f3e0-4994-869c-fac0e8c9d5dc", nil)
+	resp, err := s.app.Test(req, -1)
+	s.NoError(err)
+	s.NotEqual(fiber.StatusInternalServerError, resp.StatusCode)
+}
 
-		resp, err := app.Test(req, -1)
-		assert.NoError(t, err)
-		assert.True(t, resp.StatusCode == fiber.StatusOK || resp.StatusCode == fiber.StatusUnauthorized)
-	})
+// === AUTH ROUTES ===
 
-	// === ORDERS ===
-	t.Run("GET /api/v1/orders", func(t *testing.T) {
-		req := httptest.NewRequest("GET", "/api/v1/orders", nil)
-		resp, err := app.Test(req, -1)
-		assert.NoError(t, err)
-		assert.Equal(t, fiber.StatusOK, resp.StatusCode)
-	})
+func (s *PublicRoutesTestSuite) TestSignup() {
+	body := map[string]string{
+		"email":    "testuser@example.com",
+		"password": "securepassword123",
+	}
+	jsonBody, _ := json.Marshal(body)
 
-	t.Run("GET /api/v1/orders/:id (not found)", func(t *testing.T) {
-		req := httptest.NewRequest("GET", "/api/v1/orders/999", nil)
-		resp, err := app.Test(req, -1)
-		assert.NoError(t, err)
-		assert.NotEqual(t, fiber.StatusInternalServerError, resp.StatusCode)
-	})
+	req := httptest.NewRequest("POST", "/api/v1/auth/signup", bytes.NewBuffer(jsonBody))
+	req.Header.Set("Content-Type", "application/json")
 
-	t.Run("POST /api/v1/orders", func(t *testing.T) {
-		body := map[string]interface{}{
-			"total": 300,
-		}
-		jsonBody, _ := json.Marshal(body)
+	resp, err := s.app.Test(req, -1)
+	s.NoError(err)
+	s.True(resp.StatusCode == fiber.StatusOK || resp.StatusCode == fiber.StatusCreated)
+}
 
-		req := httptest.NewRequest("POST", "/api/v1/orders", bytes.NewBuffer(jsonBody))
-		req.Header.Set("Content-Type", "application/json")
+func (s *PublicRoutesTestSuite) TestSignin() {
+	// First signup to create a user
+	signupBody := map[string]string{
+		"email":    "signinuser@example.com",
+		"password": "securepassword123",
+	}
+	jsonSignupBody, _ := json.Marshal(signupBody)
+	signupReq := httptest.NewRequest("POST", "/api/v1/auth/signup", bytes.NewBuffer(jsonSignupBody))
+	signupReq.Header.Set("Content-Type", "application/json")
+	_, _ = s.app.Test(signupReq, -1)
 
-		resp, err := app.Test(req, -1)
-		assert.NoError(t, err)
-		assert.True(t, resp.StatusCode == fiber.StatusOK || resp.StatusCode == fiber.StatusCreated)
-	})
+	// Then try to signin
+	body := map[string]string{
+		"email":    "signinuser@example.com",
+		"password": "securepassword123",
+	}
+	jsonBody, _ := json.Marshal(body)
 
-	t.Run("PATCH /api/v1/orders/:id", func(t *testing.T) {
-		body := map[string]interface{}{
-			"total": 3001,
-		}
-		jsonBody, _ := json.Marshal(body)
+	req := httptest.NewRequest("POST", "/api/v1/auth/signin", bytes.NewBuffer(jsonBody))
+	req.Header.Set("Content-Type", "application/json")
 
-		req := httptest.NewRequest("PATCH", "/api/v1/orders/1", bytes.NewBuffer(jsonBody))
-		req.Header.Set("Content-Type", "application/json")
+	resp, err := s.app.Test(req, -1)
+	s.NoError(err)
+	s.True(resp.StatusCode == fiber.StatusOK || resp.StatusCode == fiber.StatusUnauthorized)
+}
 
-		resp, err := app.Test(req, -1)
-		assert.NoError(t, err)
-		assert.True(t, resp.StatusCode >= 200 && resp.StatusCode < 500)
-	})
+func (s *PublicRoutesTestSuite) TestSignin_InvalidCredentials() {
+	body := map[string]string{
+		"email":    "nonexistent@example.com",
+		"password": "wrongpassword",
+	}
+	jsonBody, _ := json.Marshal(body)
 
-	t.Run("DELETE /api/v1/orders/:id", func(t *testing.T) {
-		req := httptest.NewRequest("DELETE", "/api/v1/orders/1", nil)
-		resp, err := app.Test(req, -1)
-		assert.NoError(t, err)
-		assert.True(t, resp.StatusCode >= 200 && resp.StatusCode < 500)
-	})
+	req := httptest.NewRequest("POST", "/api/v1/auth/signin", bytes.NewBuffer(jsonBody))
+	req.Header.Set("Content-Type", "application/json")
+
+	resp, err := s.app.Test(req, -1)
+	s.NoError(err)
+	s.Equal(fiber.StatusUnauthorized, resp.StatusCode)
+}
+
+// === ORDER ROUTES ===
+
+func (s *PublicRoutesTestSuite) TestGetOrders() {
+	req := httptest.NewRequest("GET", "/api/v1/orders", nil)
+	resp, err := s.app.Test(req, -1)
+	s.NoError(err)
+	s.Equal(fiber.StatusOK, resp.StatusCode)
+}
+
+func (s *PublicRoutesTestSuite) TestGetOrderByID_NotFound() {
+	req := httptest.NewRequest("GET", "/api/v1/orders/999", nil)
+	resp, err := s.app.Test(req, -1)
+	s.NoError(err)
+	s.NotEqual(fiber.StatusInternalServerError, resp.StatusCode)
+}
+
+func (s *PublicRoutesTestSuite) TestCreateOrder() {
+	body := map[string]interface{}{
+		"total": 300,
+	}
+	jsonBody, _ := json.Marshal(body)
+
+	req := httptest.NewRequest("POST", "/api/v1/orders", bytes.NewBuffer(jsonBody))
+	req.Header.Set("Content-Type", "application/json")
+
+	resp, err := s.app.Test(req, -1)
+	s.NoError(err)
+	s.True(resp.StatusCode == fiber.StatusOK || resp.StatusCode == fiber.StatusCreated)
+}
+
+func (s *PublicRoutesTestSuite) TestPatchOrder() {
+	// First create an order
+	createBody := map[string]interface{}{
+		"total": 300,
+	}
+	createJsonBody, _ := json.Marshal(createBody)
+	createReq := httptest.NewRequest("POST", "/api/v1/orders", bytes.NewBuffer(createJsonBody))
+	createReq.Header.Set("Content-Type", "application/json")
+	createResp, _ := s.app.Test(createReq, -1)
+	s.True(createResp.StatusCode == fiber.StatusOK || createResp.StatusCode == fiber.StatusCreated)
+
+	// Then try to patch it
+	body := map[string]interface{}{
+		"total": 3001,
+	}
+	jsonBody, _ := json.Marshal(body)
+
+	req := httptest.NewRequest("PATCH", "/api/v1/orders/1", bytes.NewBuffer(jsonBody))
+	req.Header.Set("Content-Type", "application/json")
+
+	resp, err := s.app.Test(req, -1)
+	s.NoError(err)
+	s.True(resp.StatusCode >= 200 && resp.StatusCode < 500)
+}
+
+func (s *PublicRoutesTestSuite) TestDeleteOrder() {
+	// First create an order
+	createBody := map[string]interface{}{
+		"total": 300,
+	}
+	createJsonBody, _ := json.Marshal(createBody)
+	createReq := httptest.NewRequest("POST", "/api/v1/orders", bytes.NewBuffer(createJsonBody))
+	createReq.Header.Set("Content-Type", "application/json")
+	createResp, _ := s.app.Test(createReq, -1)
+	s.True(createResp.StatusCode == fiber.StatusOK || createResp.StatusCode == fiber.StatusCreated)
+
+	// Then try to delete it
+	req := httptest.NewRequest("DELETE", "/api/v1/orders/1", nil)
+	resp, err := s.app.Test(req, -1)
+	s.NoError(err)
+	s.True(resp.StatusCode >= 200 && resp.StatusCode < 500)
 }

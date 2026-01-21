@@ -34,6 +34,7 @@
 .env
 .env.*
 !.env.example
+!.env.test.example
 
 # OS generated files
 .DS_Store

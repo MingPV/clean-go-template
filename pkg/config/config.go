@@ -39,7 +39,7 @@ func LoadConfig(env string) *Config {
 
 	cfg := &Config{
 		AppPort:       getEnv("APP_PORT", "8000"),
-		GrpcPort:      getEnv("GRPC_PORT", "50051"),
+		GrpcPort:      getEnv("GRPC_PORT", "50052"),
 		AppEnv:        getEnv("APP_ENV", "development"),
 		DBHost:        getEnv("DB_HOST", "localhost"),
 		DBPort:        getEnv("DB_PORT", "5432"),
