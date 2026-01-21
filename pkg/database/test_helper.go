@@ -15,26 +15,19 @@ import (
 // SetupTestDB creates a test database connection and returns a GORM DB instance
 // Uses a single test database and cleans tables before/after each test
 func SetupTestDB(t *testing.T) (*gorm.DB, func()) {
-	// Load .env.dev file - required for tests
-	// Try multiple paths to find .env.dev
+	// Try to load .env.dev file (optional - for local development)
+	// In CI, environment variables are set directly, so this is not required
 	envPaths := []string{
 		".env.dev",
 		"../../.env.dev",
 		"../../../.env.dev",
 	}
 
-	var envLoaded bool
 	for _, path := range envPaths {
 		if _, err := os.Stat(path); err == nil {
-			if err := godotenv.Load(path); err == nil {
-				envLoaded = true
-				break
-			}
+			_ = godotenv.Load(path) // Ignore errors - env vars may be set via CI
+			break
 		}
-	}
-
-	if !envLoaded {
-		t.Fatalf("Failed to load .env.dev file. Please create .env.dev from .env.example. Tried paths: %v", envPaths)
 	}
 
 	// Get test database connection details from environment or use defaults
